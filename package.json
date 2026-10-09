@@ -11,7 +11,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "env:sync": "bash scripts/sync-vercel-env.sh"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",
