@@ -7,12 +7,8 @@ import { CheckDirectionSelect } from "@/components/check-direction-select";
 import { SEVERITY_LABEL } from "@/lib/labels";
 import type { CheckDirectionId } from "@/lib/check-directions";
 import type { CheckResult } from "@/lib/schemas";
-import {
-  diffSpans,
-  findQuoteRange,
-  lineNumberAt,
-  sliceByQuote,
-} from "@/lib/text-patch";
+import { findIssueRange } from "@/lib/issue-range";
+import { diffSpans, lineNumberAt } from "@/lib/text-patch";
 
 type CheckPanelProps = {
   check: CheckResult | null;
@@ -20,7 +16,12 @@ type CheckPanelProps = {
   loading: boolean;
   resolved: Record<string, "applied" | "ignored">;
   onRunCheck: () => void;
-  onApply: (issueId: string, quote: string, suggestion: string) => void;
+  onApply: (
+    issueId: string,
+    quote: string,
+    suggestion: string,
+    span: { start: number; end: number },
+  ) => void;
   onApplyAll: () => void;
   onIgnore: (issueId: string) => void;
   onLocate: (quote: string) => void;
@@ -107,9 +108,9 @@ export function CheckPanel({
         )}
 
         {visibleIssues.map((issue) => {
-          const range = findQuoteRange(text, issue.quote);
+          const range = findIssueRange(text, issue);
           const line = range ? lineNumberAt(text, range[0]) : null;
-          const matched = sliceByQuote(text, issue.quote) ?? issue.quote;
+          const matched = range ? text.slice(range[0], range[1]) : issue.quote;
           const spans = diffSpans(matched, issue.suggestion);
 
           return (
@@ -170,7 +171,10 @@ export function CheckPanel({
                 <button
                   type="button"
                   onClick={() =>
-                    onApply(issue.id, issue.quote, issue.suggestion)
+                    onApply(issue.id, issue.quote, issue.suggestion, {
+                      start: issue.start,
+                      end: issue.end,
+                    })
                   }
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
                 >

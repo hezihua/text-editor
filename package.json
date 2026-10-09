@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "env:sync": "bash scripts/sync-vercel-env.sh"
+    "env:sync": "bash scripts/sync-vercel-env.sh",
+    "check:regression": "tsx scripts/check-regression.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",
@@ -33,6 +34,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   }
 }

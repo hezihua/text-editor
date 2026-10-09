@@ -1,5 +1,7 @@
 import type { CheckResult } from "./schemas";
-import { diffSpans, findQuoteRange } from "./text-patch";
+import { findIssueRange } from "./issue-range";
+import { diffSpans } from "./text-patch";
+import type { CheckIssue } from "./schemas";
 
 export type CheckHighlight = {
   issueId: string;
@@ -18,14 +20,14 @@ export type MarkedSegment = {
 
 export function collectCheckHighlights(
   text: string,
-  issues: CheckResult["issues"],
+  issues: CheckIssue[],
   resolved: Record<string, "applied" | "ignored">,
 ): CheckHighlight[] {
   const highlights: CheckHighlight[] = [];
 
   for (const issue of issues) {
     if (resolved[issue.id]) continue;
-    const range = findQuoteRange(text, issue.quote);
+    const range = findIssueRange(text, issue);
     if (!range) continue;
     highlights.push({
       issueId: issue.id,

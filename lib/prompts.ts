@@ -23,6 +23,8 @@ ${direction.promptFocus}
 - 仍须标注真正的语法、标点错误（若存在）
 - 每条 issue 必须有简短 title
 - quote 必须从正文原样复制（含标点、引号「」""、emoji，一字不差）；suggestion 用于替换 quote 的完整片段
+- 每条 issue 必须提供 start、end：0-based 字符下标，左闭右开，且 text.slice(start,end) 必须与 quote 完全一致
+- id 可省略（服务端会生成）；若填写请用简短数字字符串
 - 优先 high / medium，low 不超过 3 条
 - 全部使用简体中文
 
@@ -31,4 +33,18 @@ ${direction.promptFocus}
 ${text}
 """
 `;
+}
+
+/** 校验失败后的重试 prompt，强调 JSON 字段与偏移 */
+export function buildCheckPromptStrict(
+  text: string,
+  directionId: CheckDirectionId,
+) {
+  return `${buildCheckPrompt(text, directionId)}
+
+重要：上次输出未通过校验。请严格输出 JSON：
+- summary 1–500 字
+- issues 每项含 category、severity、title、quote、message、suggestion、start、end
+- start/end 必须精确对应 quote 在上方正文中的位置（JavaScript 字符串下标）
+- 不要输出正文以外的片段`;
 }

@@ -1,3 +1,6 @@
+import { findIssueRange } from "./issue-range";
+import type { IssueSpan } from "./issue-range";
+
 /** 匹配时视为等价的引号 */
 const QUOTE_EQUIV = new Set([
   '"',
@@ -134,8 +137,11 @@ export function applyReplacement(
   text: string,
   quote: string,
   replacement: string,
+  span?: Pick<IssueSpan, "start" | "end">,
 ): { next: string; ok: boolean } {
-  const range = findQuoteRange(text, quote);
+  const range = span
+    ? findIssueRange(text, { quote, ...span })
+    : findQuoteRange(text, quote);
   if (!range) return { next: text, ok: false };
   const [start, end] = range;
   return {
@@ -148,6 +154,8 @@ export type PatchItem = {
   id: string;
   quote: string;
   suggestion: string;
+  start?: number;
+  end?: number;
 };
 
 /** 从后往前应用，避免前面的替换影响后面定位 */
@@ -160,7 +168,7 @@ export function applyAllReplacements(
 
   const sortable: { item: PatchItem; start: number }[] = [];
   for (const item of items) {
-    const range = findQuoteRange(text, item.quote);
+    const range = findIssueRange(text, item);
     if (!range) {
       failedIds.push(item.id);
       continue;
@@ -172,7 +180,12 @@ export function applyAllReplacements(
 
   let next = text;
   for (const { item } of sortable) {
-    const result = applyReplacement(next, item.quote, item.suggestion);
+    const result = applyReplacement(
+      next,
+      item.quote,
+      item.suggestion,
+      item,
+    );
     if (result.ok) {
       next = result.next;
       appliedIds.push(item.id);

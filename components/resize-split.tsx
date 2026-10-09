@@ -40,10 +40,17 @@ export function ResizeSplit({
   stackBelowLg = true,
 }: ResizeSplitProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const ratioRef = useRef(readStoredRatio(storageKey, initialRatio));
-  const [ratio, setRatio] = useState(ratioRef.current);
+  const ratioRef = useRef(initialRatio);
+  /** 首屏与 SSR 一致，避免 localStorage 导致 hydration 不匹配 */
+  const [ratio, setRatio] = useState(initialRatio);
   const [isDesktop, setIsDesktop] = useState(true);
   const draggingRef = useRef(false);
+
+  useEffect(() => {
+    const stored = readStoredRatio(storageKey, initialRatio);
+    ratioRef.current = stored;
+    setRatio(stored);
+  }, [storageKey, initialRatio]);
 
   useEffect(() => {
     if (!stackBelowLg) return;

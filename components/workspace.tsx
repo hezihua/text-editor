@@ -113,7 +113,17 @@ export function Workspace() {
       if (!res.ok) {
         throw new Error(data.error ?? "请求失败");
       }
-      setResult(data as AnalyzeResponse);
+      const payload = data as AnalyzeResponse;
+      setResult(payload);
+      if (payload.meta?.degraded) {
+        setError(payload.meta.degraded);
+      } else if (payload.meta?.droppedIssueCount) {
+        setError(
+          `有 ${payload.meta.droppedIssueCount} 条建议因无法定位已自动忽略。`,
+        );
+      } else {
+        setError(null);
+      }
       setIssueResolved({});
       setCheckBaselineText(text);
       setViewChanges(false);
@@ -128,8 +138,9 @@ export function Workspace() {
     issueId: string,
     quote: string,
     suggestion: string,
+    span?: { start: number; end: number },
   ) {
-    const { next, ok } = applyReplacement(text, quote, suggestion);
+    const { next, ok } = applyReplacement(text, quote, suggestion, span);
     if (!ok) {
       setError("无法在正文中定位该片段，可能已被修改。请重新检查。");
       return;
@@ -157,6 +168,8 @@ export function Workspace() {
         id: i.id,
         quote: i.quote,
         suggestion: i.suggestion,
+        start: i.start,
+        end: i.end,
       })),
     );
 
