@@ -1,3 +1,4 @@
+import { toUserFacingApiError } from "./api-error-message";
 import type { CheckDirectionId } from "./check-directions";
 import { buildIssuesFromRewriteDiff } from "./diff-to-issues";
 import { finalizeCheckResult } from "./filter-check";
@@ -60,8 +61,9 @@ export async function runCheckWithProgress(
     });
     const data = await res.json();
     if (!res.ok) {
-      lastError =
-        typeof data.error === "string" ? data.error : "分段改写失败";
+      lastError = toUserFacingApiError(
+        typeof data.error === "string" ? data.error : "分段改写失败",
+      );
       throw new Error(lastError);
     }
 

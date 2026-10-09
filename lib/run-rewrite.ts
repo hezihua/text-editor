@@ -6,7 +6,7 @@ import { logAnalyzeMetrics, usageToMetrics } from "./analyze-metrics";
 import type { CheckDirectionId } from "./check-directions";
 import { finalizeCheckResult } from "./filter-check";
 import { getLanguageModel } from "./llm";
-import { buildRewritePrompt } from "./prompts";
+import { buildRewritePrompt } from "./rewrite-prompt";
 import type { CheckResult } from "./schemas";
 import { splitTextIntoChunks, type TextChunk } from "./text-chunks";
 

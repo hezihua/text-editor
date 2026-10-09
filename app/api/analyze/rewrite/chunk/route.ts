@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { toUserFacingApiError } from "@/lib/api-error-message";
 import { checkDirectionIdSchema } from "@/lib/check-directions";
 import { REWRITE_MAX_CHARS, usesRewriteMode } from "@/lib/rewrite-directions";
 import { rewriteTextChunk } from "@/lib/run-rewrite";
@@ -38,8 +39,11 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const message =
+    const raw =
       err instanceof Error ? err.message : "分段改写失败";
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      { error: toUserFacingApiError(raw) },
+      { status: 502 },
+    );
   }
 }
