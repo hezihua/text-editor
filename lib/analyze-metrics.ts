@@ -1,5 +1,7 @@
 import type { LanguageModelUsage } from "ai";
 
+import type { AnalyzeMeta } from "./schemas";
+
 export type AnalyzeMetrics = {
   event: "analyze";
   ok: boolean;
@@ -18,8 +20,30 @@ export type AnalyzeMetrics = {
   error?: string;
 };
 
+/** 服务端单行 JSON，Vercel / 本地终端可搜 `[analyze-metrics]` */
 export function logAnalyzeMetrics(metrics: AnalyzeMetrics) {
-  console.info(JSON.stringify(metrics));
+  console.info("[analyze-metrics]", JSON.stringify(metrics));
+}
+
+/** 侧栏展示用 */
+export function formatAnalyzeMeta(meta: AnalyzeMeta, issueCount: number): string {
+  const parts: string[] = [
+    `耗时 ${(meta.durationMs / 1000).toFixed(1)}s`,
+  ];
+  if (meta.chunkCount > 1) {
+    parts.push(`${meta.chunkCount} 段`);
+  }
+  parts.push(`${issueCount} 条建议`);
+  if (meta.usage?.totalTokens != null) {
+    parts.push(`${meta.usage.totalTokens} tokens`);
+  }
+  if (meta.retryCount > 0) {
+    parts.push(`重试 ${meta.retryCount}`);
+  }
+  if (meta.droppedIssueCount > 0) {
+    parts.push(`丢弃 ${meta.droppedIssueCount}`);
+  }
+  return parts.join(" · ");
 }
 
 export function sumUsage(

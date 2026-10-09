@@ -45,6 +45,7 @@ export function buildMarkedSegments(
   text: string,
   highlights: CheckHighlight[],
   activeQuote: string | null,
+  activeIssueId: string | null = null,
 ): MarkedSegment[] {
   if (highlights.length === 0) {
     return [{ text, marked: false, active: false, severity: null }];
@@ -66,8 +67,10 @@ export function buildMarkedSegments(
     const covering = highlights.filter((h) => h.start <= start && h.end >= end);
     const marked = covering.length > 0;
     const active =
-      activeQuote != null &&
-      covering.some((h) => h.quote === activeQuote || activeQuote === h.quote);
+      (activeIssueId != null &&
+        covering.some((h) => h.issueId === activeIssueId)) ||
+      (activeQuote != null &&
+        covering.some((h) => h.quote === activeQuote || activeQuote === h.quote));
     const severity = marked
       ? (covering.find((h) => h.severity === "high")?.severity ??
         covering.find((h) => h.severity === "medium")?.severity ??
@@ -140,7 +143,11 @@ export function buildOverlayPieces(
   text: string,
   issues: CheckResult["issues"],
   resolved: Record<string, "applied" | "ignored">,
-  options: { viewChanges: boolean; activeQuote: string | null },
+  options: {
+    viewChanges: boolean;
+    activeQuote: string | null;
+    activeIssueId?: string | null;
+  },
 ): OverlayPiece[] {
   const highlights = collectCheckHighlights(text, issues, resolved);
   if (highlights.length === 0) {
@@ -156,7 +163,12 @@ export function buildOverlayPieces(
   }
 
   if (!options.viewChanges) {
-    return buildMarkedSegments(text, highlights, options.activeQuote).map(
+    return buildMarkedSegments(
+      text,
+      highlights,
+      options.activeQuote,
+      options.activeIssueId ?? null,
+    ).map(
       (seg) => ({
         kind: "underline" as const,
         text: seg.text,
@@ -187,8 +199,10 @@ export function buildOverlayPieces(
       ? issueById.get(covering[0].issueId)
       : undefined;
     const active =
-      options.activeQuote != null &&
-      covering.some((h) => h.quote === options.activeQuote);
+      (options.activeIssueId != null &&
+        covering.some((h) => h.issueId === options.activeIssueId)) ||
+      (options.activeQuote != null &&
+        covering.some((h) => h.quote === options.activeQuote));
 
     if (issue && covering.length > 0) {
       pieces.push({

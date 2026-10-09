@@ -1,4 +1,4 @@
-import { generateText, Output, type LanguageModelUsage } from "ai";
+import type { LanguageModelUsage } from "ai";
 
 import {
   logAnalyzeMetrics,
@@ -6,13 +6,11 @@ import {
   usageToMetrics,
 } from "./analyze-metrics";
 import type { CheckDirectionId } from "./check-directions";
-import { getLanguageModel } from "./llm";
+import { checkSingleChunk } from "./check-single-chunk";
+import { applyDirectionIssueFilter } from "./filter-check";
 import { mergeChunkResults, normalizeChunkCheck } from "./normalize-check";
-import { buildCheckPrompt, buildCheckPromptStrict } from "./prompts";
-import { checkResultSchema, type CheckResult } from "./schemas";
+import type { CheckResult } from "./schemas";
 import { splitTextIntoChunks } from "./text-chunks";
-
-const MAX_ATTEMPTS = 3;
 
 export type RunCheckOptions = {
   text: string;
@@ -30,64 +28,6 @@ export type RunCheckResult = {
     degraded?: string;
   };
 };
-
-async function callCheckOnce(
-  chunkText: string,
-  direction: CheckDirectionId,
-  strict: boolean,
-): Promise<{
-  output: unknown;
-  usage?: LanguageModelUsage;
-}> {
-  const model = getLanguageModel();
-  const prompt = strict
-    ? buildCheckPromptStrict(chunkText, direction)
-    : buildCheckPrompt(chunkText, direction);
-
-  const { output, usage } = await generateText({
-    model,
-    output: Output.object({ schema: checkResultSchema }),
-    prompt,
-  });
-
-  return { output, usage };
-}
-
-async function checkSingleChunk(
-  chunkText: string,
-  direction: CheckDirectionId,
-): Promise<{ raw: unknown; usage?: LanguageModelUsage; retries: number }> {
-  let lastError: unknown;
-  let retries = 0;
-
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const strict = attempt > 0;
-    try {
-      const { output, usage } = await callCheckOnce(
-        chunkText,
-        direction,
-        strict,
-      );
-      if (output == null) {
-        throw new Error("empty_output");
-      }
-      const validated = checkResultSchema.safeParse(output);
-      if (!validated.success) {
-        retries += 1;
-        lastError = validated.error;
-        continue;
-      }
-      return { raw: validated.data, usage, retries };
-    } catch (e) {
-      retries += 1;
-      lastError = e;
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("检查块失败，请稍后重试");
-}
 
 export async function runCheck({
   text,
@@ -150,7 +90,10 @@ export async function runCheck({
     throw err;
   }
 
-  const check = mergeChunkResults(partialResults);
+  const check = applyDirectionIssueFilter(
+    mergeChunkResults(partialResults),
+    direction,
+  );
   const durationMs = Date.now() - started;
 
   logAnalyzeMetrics({

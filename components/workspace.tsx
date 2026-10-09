@@ -8,7 +8,7 @@ import {
   PanelRightOpen,
   Upload,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CheckPanel } from "@/components/check-panel";
 import { MarkdownPreview } from "@/components/markdown-preview";
@@ -28,13 +28,24 @@ import {
   UPLOAD_ACCEPT,
 } from "@/lib/file-markdown";
 import { SAMPLE_DRAFT } from "@/lib/labels";
-import type { AnalyzeResponse } from "@/lib/schemas";
+import {
+  recheckIssueSpan,
+  runCheckWithProgress,
+  type CheckProgress,
+} from "@/lib/client-analyze";
+import {
+  appendCheckHistory,
+  loadCheckHistory,
+  type CheckHistoryEntry,
+} from "@/lib/check-history";
+import { findIssueRange } from "@/lib/issue-range";
+import type { AnalyzeResponse, CheckIssue } from "@/lib/schemas";
 import type { TranslateTarget } from "@/lib/translate";
 import {
   applyAllReplacements,
   applyReplacement,
-  findQuoteRange,
 } from "@/lib/text-patch";
+import { splitTextIntoChunks } from "@/lib/text-chunks";
 
 export function Workspace() {
   const [text, setText] = useState(SAMPLE_DRAFT);
@@ -58,6 +69,19 @@ export function Workspace() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [documentName, setDocumentName] = useState("文稿.md");
   const [mdPreviewOpen, setMdPreviewOpen] = useState(false);
+  const [checkProgress, setCheckProgress] = useState<CheckProgress | null>(
+    null,
+  );
+  const [checkHistory, setCheckHistory] = useState<CheckHistoryEntry[]>([]);
+  const [activeIssueId, setActiveIssueId] = useState<string | null>(null);
+  const [recheckingIssueId, setRecheckingIssueId] = useState<string | null>(
+    null,
+  );
+  const [issueActionHint, setIssueActionHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCheckHistory(loadCheckHistory());
+  }, []);
 
   function resetAfterDocumentChange() {
     setResult(null);
@@ -65,6 +89,7 @@ export function Workspace() {
     setCheckBaselineText(null);
     setViewChanges(false);
     setActiveQuote(null);
+    setActiveIssueId(null);
   }
 
   async function handleUploadFile(file: File) {
@@ -90,10 +115,11 @@ export function Workspace() {
     setError(null);
   }
 
-  const focusQuote = useCallback(
-    (quote: string) => {
-      setActiveQuote(quote);
-      const range = findQuoteRange(text, quote);
+  const focusIssue = useCallback(
+    (issue: CheckIssue) => {
+      setActiveIssueId(issue.id);
+      setActiveQuote(issue.quote);
+      const range = findIssueRange(text, issue);
       if (!range) return;
       editorRef.current?.focusRange(range[0], range[1]);
     },
@@ -103,23 +129,21 @@ export function Workspace() {
   async function runCheck() {
     setCheckLoading(true);
     setError(null);
+    const total = splitTextIntoChunks(text).length;
+    setCheckProgress({ current: 0, total });
     try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, direction: checkDirection }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error ?? "请求失败");
-      }
-      const payload = data as AnalyzeResponse;
+      const { check, meta } = await runCheckWithProgress(
+        text,
+        checkDirection,
+        setCheckProgress,
+      );
+      const payload: AnalyzeResponse = { check, meta };
       setResult(payload);
-      if (payload.meta?.degraded) {
-        setError(payload.meta.degraded);
-      } else if (payload.meta?.droppedIssueCount) {
+      if (meta.degraded) {
+        setError(meta.degraded);
+      } else if (meta.droppedIssueCount) {
         setError(
-          `有 ${payload.meta.droppedIssueCount} 条建议因无法定位已自动忽略。`,
+          `有 ${meta.droppedIssueCount} 条建议因无法定位已自动忽略。`,
         );
       } else {
         setError(null);
@@ -127,33 +151,94 @@ export function Workspace() {
       setIssueResolved({});
       setCheckBaselineText(text);
       setViewChanges(false);
+      setActiveIssueId(check.issues[0]?.id ?? null);
+      setCheckHistory(
+        appendCheckHistory({
+          direction: checkDirection,
+          summary: check.summary,
+          issueCount: check.issues.length,
+          textLength: text.length,
+        }),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "未知错误");
     } finally {
       setCheckLoading(false);
+      setCheckProgress(null);
     }
   }
 
-  function handleApplyIssue(
-    issueId: string,
-    quote: string,
-    suggestion: string,
-    span?: { start: number; end: number },
-  ) {
-    const { next, ok } = applyReplacement(text, quote, suggestion, span);
-    if (!ok) {
-      setError("无法在正文中定位该片段，可能已被修改。请重新检查。");
-      return;
+  async function handleCopyIssueQuote(issue: CheckIssue) {
+    const range = findIssueRange(text, issue);
+    const snippet = range ? text.slice(range[0], range[1]) : issue.quote;
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setIssueActionHint("已复制片段");
+      window.setTimeout(() => setIssueActionHint(null), 1500);
+    } catch {
+      setIssueActionHint("复制失败");
     }
-    setText(next);
-    setIssueResolved((prev) => ({ ...prev, [issueId]: "applied" }));
-    setActiveQuote(null);
+  }
+
+  async function handleRecheckIssue(issue: CheckIssue) {
+    setRecheckingIssueId(issue.id);
     setError(null);
+    try {
+      const updated = await recheckIssueSpan(
+        text,
+        issue,
+        checkDirection,
+      );
+      if (!updated) {
+        setIssueActionHint("该片段未发现新问题");
+        window.setTimeout(() => setIssueActionHint(null), 2000);
+        return;
+      }
+      setResult((prev) => {
+        if (!prev?.check) return prev;
+        return {
+          ...prev,
+          check: {
+            ...prev.check,
+            issues: prev.check.issues.map((i) =>
+              i.id === issue.id ? updated : i,
+            ),
+          },
+        };
+      });
+      focusIssue(updated);
+      setIssueActionHint("已更新本条建议");
+      window.setTimeout(() => setIssueActionHint(null), 1500);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "重新检查失败");
+    } finally {
+      setRecheckingIssueId(null);
+    }
   }
 
-  function handleIgnoreIssue(issueId: string) {
+  const handleApplyIssue = useCallback(
+    (
+      issueId: string,
+      quote: string,
+      suggestion: string,
+      span?: { start: number; end: number },
+    ) => {
+      const { next, ok } = applyReplacement(text, quote, suggestion, span);
+      if (!ok) {
+        setError("无法在正文中定位该片段，可能已被修改。请重新检查。");
+        return;
+      }
+      setText(next);
+      setIssueResolved((prev) => ({ ...prev, [issueId]: "applied" }));
+      setActiveQuote(null);
+      setError(null);
+    },
+    [text],
+  );
+
+  const handleIgnoreIssue = useCallback((issueId: string) => {
     setIssueResolved((prev) => ({ ...prev, [issueId]: "ignored" }));
-  }
+  }, []);
 
   function handleApplyAllIssues() {
     const issues = result?.check?.issues;
@@ -191,9 +276,84 @@ export function Workspace() {
   }
 
   const checkIssues = result?.check?.issues ?? [];
-  const pendingCheckCount = checkIssues.filter(
-    (i) => !issueResolved[i.id],
-  ).length;
+  const pendingIssues = useMemo(
+    () => checkIssues.filter((i) => !issueResolved[i.id]),
+    [checkIssues, issueResolved],
+  );
+  const pendingCheckCount = pendingIssues.length;
+
+  const activeIssue = useMemo(() => {
+    if (!activeIssueId) return pendingIssues[0] ?? null;
+    return (
+      pendingIssues.find((i) => i.id === activeIssueId) ??
+      pendingIssues[0] ??
+      null
+    );
+  }, [activeIssueId, pendingIssues]);
+
+  const selectRelativeIssue = useCallback(
+    (delta: number) => {
+      if (pendingIssues.length === 0) return;
+      const idx = activeIssue
+        ? pendingIssues.findIndex((i) => i.id === activeIssue.id)
+        : -1;
+      const nextIdx =
+        idx < 0
+          ? 0
+          : (idx + delta + pendingIssues.length) % pendingIssues.length;
+      focusIssue(pendingIssues[nextIdx]!);
+    },
+    [activeIssue, focusIssue, pendingIssues],
+  );
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!e.altKey || pendingIssues.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectRelativeIssue(1);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectRelativeIssue(-1);
+        return;
+      }
+      if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        if (activeIssue) focusIssue(activeIssue);
+        return;
+      }
+      if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        if (!activeIssue) return;
+        handleApplyIssue(
+          activeIssue.id,
+          activeIssue.quote,
+          activeIssue.suggestion,
+          { start: activeIssue.start, end: activeIssue.end },
+        );
+        selectRelativeIssue(1);
+        return;
+      }
+      if (e.key === "i" || e.key === "I") {
+        e.preventDefault();
+        if (!activeIssue) return;
+        handleIgnoreIssue(activeIssue.id);
+        selectRelativeIssue(1);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    activeIssue,
+    focusIssue,
+    handleApplyIssue,
+    handleIgnoreIssue,
+    pendingIssues.length,
+    selectRelativeIssue,
+  ]);
   const canRun = text.trim().length >= 20;
   const showIssueUnderlines =
     pendingCheckCount > 0 && Boolean(result?.check);
@@ -358,6 +518,7 @@ export function Workspace() {
                     checkBaselineText={checkBaselineText}
                     pendingIssueCount={pendingCheckCount}
                     activeQuote={activeQuote}
+                    activeIssueId={activeIssue?.id ?? null}
                   />
                 }
                 second={
@@ -384,6 +545,7 @@ export function Workspace() {
                 checkBaselineText={checkBaselineText}
                 pendingIssueCount={pendingCheckCount}
                 activeQuote={activeQuote}
+                activeIssueId={activeIssue?.id ?? null}
               />
             )}
           </div>
@@ -391,25 +553,40 @@ export function Workspace() {
           }
           second={
         <aside className="flex h-full min-h-0 flex-col overflow-hidden border-t border-stone-200 bg-white lg:border-t-0">
-          {error && (
-            <div className="mx-3 mt-3 flex shrink-0 gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p>{error}</p>
+          {(error || issueActionHint) && (
+            <div
+              className={`mx-3 mt-3 flex shrink-0 gap-2 rounded-xl border p-3 text-sm ${
+                error
+                  ? "border-red-200 bg-red-50 text-red-800"
+                  : "border-stone-200 bg-stone-50 text-stone-700"
+              }`}
+            >
+              {error && (
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              )}
+              <p>{error ?? issueActionHint}</p>
             </div>
           )}
           <CheckPanel
             check={result?.check ?? null}
             text={text}
             loading={checkLoading}
+            checkProgress={checkProgress}
             resolved={issueResolved}
             onRunCheck={runCheck}
             onApply={handleApplyIssue}
             onApplyAll={handleApplyAllIssues}
             onIgnore={handleIgnoreIssue}
-            onLocate={focusQuote}
+            onFocusIssue={focusIssue}
+            onCopyIssueQuote={handleCopyIssueQuote}
+            onRecheckIssue={handleRecheckIssue}
+            recheckingIssueId={recheckingIssueId}
             canRun={canRun}
             direction={checkDirection}
             onDirectionChange={setCheckDirection}
+            checkMeta={result?.meta ?? null}
+            checkHistory={checkHistory}
+            activeIssueId={activeIssue?.id ?? null}
           />
         </aside>
           }

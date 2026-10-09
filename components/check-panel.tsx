@@ -1,19 +1,32 @@
 "use client";
 
-import { Check, CheckCheck, Loader2, X } from "lucide-react";
-import { useMemo } from "react";
+import {
+  Check,
+  CheckCheck,
+  Copy,
+  Loader2,
+  RefreshCw,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { CheckDirectionSelect } from "@/components/check-direction-select";
-import { SEVERITY_LABEL } from "@/lib/labels";
+import { CheckHistoryList } from "@/components/check-history-list";
+import { CheckProgressBar } from "@/components/check-progress";
+import { CheckRunStats } from "@/components/check-run-stats";
+import type { CheckHistoryEntry } from "@/lib/check-history";
 import type { CheckDirectionId } from "@/lib/check-directions";
-import type { CheckResult } from "@/lib/schemas";
 import { findIssueRange } from "@/lib/issue-range";
+import { SEVERITY_LABEL } from "@/lib/labels";
+import type { AnalyzeMeta, CheckIssue, CheckResult } from "@/lib/schemas";
+import type { CheckProgress } from "@/lib/client-analyze";
 import { diffSpans, lineNumberAt } from "@/lib/text-patch";
 
 type CheckPanelProps = {
   check: CheckResult | null;
   text: string;
   loading: boolean;
+  checkProgress: CheckProgress | null;
   resolved: Record<string, "applied" | "ignored">;
   onRunCheck: () => void;
   onApply: (
@@ -24,30 +37,54 @@ type CheckPanelProps = {
   ) => void;
   onApplyAll: () => void;
   onIgnore: (issueId: string) => void;
-  onLocate: (quote: string) => void;
+  onFocusIssue: (issue: CheckIssue) => void;
+  onCopyIssueQuote: (issue: CheckIssue) => void;
+  onRecheckIssue: (issue: CheckIssue) => void;
+  recheckingIssueId: string | null;
   canRun: boolean;
   direction: CheckDirectionId;
   onDirectionChange: (id: CheckDirectionId) => void;
+  checkMeta?: AnalyzeMeta | null;
+  checkHistory: CheckHistoryEntry[];
+  activeIssueId: string | null;
 };
 
 export function CheckPanel({
   check,
   text,
   loading,
+  checkProgress,
   resolved,
   onRunCheck,
   onApply,
   onApplyAll,
   onIgnore,
-  onLocate,
+  onFocusIssue,
+  onCopyIssueQuote,
+  onRecheckIssue,
+  recheckingIssueId,
   canRun,
   direction,
   onDirectionChange,
+  checkMeta,
+  checkHistory,
+  activeIssueId,
 }: CheckPanelProps) {
   const visibleIssues = useMemo(() => {
     if (!check) return [];
     return check.issues.filter((issue) => !resolved[issue.id]);
   }, [check, resolved]);
+
+  const activeRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeIssueId, visibleIssues.length]);
+
+  const progressLabel =
+    checkProgress && checkProgress.total > 1
+      ? `检查中（${checkProgress.current}/${checkProgress.total} 段）`
+      : "检查中…";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -57,6 +94,12 @@ export function CheckPanel({
           onChange={onDirectionChange}
           disabled={loading}
         />
+        {loading && checkProgress && checkProgress.total > 1 && (
+          <CheckProgressBar
+            current={checkProgress.current}
+            total={checkProgress.total}
+          />
+        )}
         <button
           type="button"
           onClick={onRunCheck}
@@ -68,7 +111,7 @@ export function CheckPanel({
           ) : (
             <Check className="h-4 w-4" />
           )}
-          {loading ? "检查中…" : "开始检查"}
+          {loading ? progressLabel : "开始检查"}
         </button>
         <button
           type="button"
@@ -84,13 +127,23 @@ export function CheckPanel({
             </span>
           )}
         </button>
+        <p className="text-[10px] leading-snug text-stone-400">
+          快捷键：Alt+↓ 下一条 · Alt+↑ 上一条 · Alt+A 应用 · Alt+I 忽略 ·
+          Alt+L 定位
+        </p>
       </div>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-3 pb-10">
+        <CheckHistoryList entries={checkHistory} />
+
         {!check && !loading && (
           <p className="py-6 text-center text-sm text-stone-500">
             点击「开始检查」分析语法、标点与表达问题。
           </p>
+        )}
+
+        {check && checkMeta && (
+          <CheckRunStats meta={checkMeta} issueCount={check.issues.length} />
         )}
 
         {check && (
@@ -112,11 +165,18 @@ export function CheckPanel({
           const line = range ? lineNumberAt(text, range[0]) : null;
           const matched = range ? text.slice(range[0], range[1]) : issue.quote;
           const spans = diffSpans(matched, issue.suggestion);
+          const isActive = issue.id === activeIssueId;
+          const isRechecking = recheckingIssueId === issue.id;
 
           return (
             <article
               key={issue.id}
-              className="overflow-hidden rounded-xl border border-stone-200 bg-white text-sm shadow-sm"
+              ref={isActive ? (el) => { activeRef.current = el; } : undefined}
+              className={`overflow-hidden rounded-xl border bg-white text-sm shadow-sm transition ${
+                isActive
+                  ? "border-stone-400 ring-2 ring-stone-300/80"
+                  : "border-stone-200"
+              }`}
             >
               <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-3 py-2">
                 {line != null && (
@@ -138,9 +198,9 @@ export function CheckPanel({
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => onLocate(issue.quote)}
+                  onClick={() => onFocusIssue(issue)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") onLocate(issue.quote);
+                    if (e.key === "Enter") onFocusIssue(issue);
                   }}
                   className="cursor-pointer rounded-lg border border-stone-200 bg-stone-50/80 p-2 font-mono text-[13px] leading-relaxed"
                 >
@@ -167,28 +227,53 @@ export function CheckPanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 border-t border-stone-100 p-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onApply(issue.id, issue.quote, issue.suggestion, {
-                      start: issue.start,
-                      end: issue.end,
-                    })
-                  }
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
-                >
-                  <Check className="h-4 w-4" />
-                  应用
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onIgnore(issue.id)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
-                >
-                  <X className="h-4 w-4" />
-                  忽略
-                </button>
+              <div className="space-y-2 border-t border-stone-100 p-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onApply(issue.id, issue.quote, issue.suggestion, {
+                        start: issue.start,
+                        end: issue.end,
+                      })
+                    }
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
+                  >
+                    <Check className="h-4 w-4" />
+                    应用
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onIgnore(issue.id)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
+                  >
+                    <X className="h-4 w-4" />
+                    忽略
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onCopyIssueQuote(issue)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-100 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    复制片段
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading || isRechecking}
+                    onClick={() => onRecheckIssue(issue)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-100 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-40"
+                  >
+                    {isRechecking ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    重新检查本条
+                  </button>
+                </div>
               </div>
             </article>
           );

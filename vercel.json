@@ -7,6 +7,9 @@
     "app/api/analyze/route.ts": {
       "maxDuration": 60
     },
+    "app/api/analyze/chunk/route.ts": {
+      "maxDuration": 60
+    },
     "app/api/translate/route.ts": {
       "maxDuration": 60
     }

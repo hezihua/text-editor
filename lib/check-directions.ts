@@ -28,9 +28,9 @@ export const CHECK_DIRECTIONS: CheckDirection[] = [
   {
     id: "basic",
     label: "基础纠错",
-    description: "语法、拼写、标点等基础错误，并给出智能修改建议",
+    description: "仅修正明确的语法、拼写、标点错误",
     promptFocus:
-      "聚焦语法、错别字、标点、语病与明显不通顺之处；兼顾绝对化用语、虚假承诺等常见表达风险。",
+      "只标注可客观判定的语法、拼写（含错别字、同音误用）、标点错误；不要润色文风、不要改表达习惯、不要提合规或「更好听」的写法。",
   },
   {
     id: "de-ai",

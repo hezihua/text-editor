@@ -32,6 +32,7 @@ type DocumentEditorProps = {
   checkBaselineText?: string | null;
   pendingIssueCount?: number;
   activeQuote?: string | null;
+  activeIssueId?: string | null;
 };
 
 const EDITOR_CLASS =
@@ -52,6 +53,7 @@ export const DocumentEditor = forwardRef<
     checkBaselineText = null,
     pendingIssueCount = 0,
     activeQuote = null,
+    activeIssueId = null,
   },
   ref,
 ) {
@@ -85,6 +87,7 @@ export const DocumentEditor = forwardRef<
       return buildOverlayPieces(text, checkIssues, issueResolved, {
         viewChanges: true,
         activeQuote,
+        activeIssueId,
       });
     }
 
@@ -92,6 +95,7 @@ export const DocumentEditor = forwardRef<
       return buildOverlayPieces(text, checkIssues, issueResolved, {
         viewChanges: false,
         activeQuote,
+        activeIssueId,
       });
     }
 
@@ -105,6 +109,7 @@ export const DocumentEditor = forwardRef<
     pendingIssueCount,
     showIssueUnderlines,
     activeQuote,
+    activeIssueId,
   ]);
 
   const lines = useMemo(() => lineCount(text), [text]);
