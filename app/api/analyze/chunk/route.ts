@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { checkDirectionIdSchema } from "@/lib/check-directions";
 import { usageToMetrics } from "@/lib/analyze-metrics";
-import { applyDirectionIssueFilter } from "@/lib/filter-check";
+import { finalizeCheckResult } from "@/lib/filter-check";
 import { normalizeChunkCheck } from "@/lib/normalize-check";
 import { checkSingleChunk } from "@/lib/check-single-chunk";
 
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       body.fullText,
     );
 
-    const check = applyDirectionIssueFilter(normalized.check, direction);
+    const check = finalizeCheckResult(normalized.check, body.fullText, direction);
 
     return NextResponse.json({
       check,

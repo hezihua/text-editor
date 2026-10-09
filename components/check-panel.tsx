@@ -47,6 +47,8 @@ type CheckPanelProps = {
   checkMeta?: AnalyzeMeta | null;
   checkHistory: CheckHistoryEntry[];
   activeIssueId: string | null;
+  proposedText?: string | null;
+  onApplyFullRewrite?: () => void;
 };
 
 export function CheckPanel({
@@ -69,6 +71,8 @@ export function CheckPanel({
   checkMeta,
   checkHistory,
   activeIssueId,
+  proposedText,
+  onApplyFullRewrite,
 }: CheckPanelProps) {
   const visibleIssues = useMemo(() => {
     if (!check) return [];
@@ -144,6 +148,22 @@ export function CheckPanel({
 
         {check && checkMeta && (
           <CheckRunStats meta={checkMeta} issueCount={check.issues.length} />
+        )}
+
+        {check && checkMeta?.mode === "rewrite" && (
+          <p className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-600">
+            已用「全文改写 + 对比 diff」生成改动点，定位由程序计算，可点「查看变更」对比改前/改后，或逐条应用。
+          </p>
+        )}
+
+        {proposedText && onApplyFullRewrite && (
+          <button
+            type="button"
+            onClick={onApplyFullRewrite}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-900 bg-stone-900 py-2.5 text-sm font-medium text-white hover:bg-stone-800"
+          >
+            应用全文改写
+          </button>
         )}
 
         {check && (

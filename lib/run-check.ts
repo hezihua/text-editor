@@ -7,7 +7,7 @@ import {
 } from "./analyze-metrics";
 import type { CheckDirectionId } from "./check-directions";
 import { checkSingleChunk } from "./check-single-chunk";
-import { applyDirectionIssueFilter } from "./filter-check";
+import { finalizeCheckResult } from "./filter-check";
 import { mergeChunkResults, normalizeChunkCheck } from "./normalize-check";
 import type { CheckResult } from "./schemas";
 import { splitTextIntoChunks } from "./text-chunks";
@@ -90,8 +90,9 @@ export async function runCheck({
     throw err;
   }
 
-  const check = applyDirectionIssueFilter(
+  const check = finalizeCheckResult(
     mergeChunkResults(partialResults),
+    text,
     direction,
   );
   const durationMs = Date.now() - started;

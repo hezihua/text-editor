@@ -132,12 +132,12 @@ export function Workspace() {
     const total = splitTextIntoChunks(text).length;
     setCheckProgress({ current: 0, total });
     try {
-      const { check, meta } = await runCheckWithProgress(
+      const { check, meta, proposedText } = await runCheckWithProgress(
         text,
         checkDirection,
         setCheckProgress,
       );
-      const payload: AnalyzeResponse = { check, meta };
+      const payload: AnalyzeResponse = { check, meta, proposedText };
       setResult(payload);
       if (meta.degraded) {
         setError(meta.degraded);
@@ -150,7 +150,7 @@ export function Workspace() {
       }
       setIssueResolved({});
       setCheckBaselineText(text);
-      setViewChanges(false);
+      setViewChanges(Boolean(proposedText));
       setActiveIssueId(check.issues[0]?.id ?? null);
       setCheckHistory(
         appendCheckHistory({
@@ -239,6 +239,18 @@ export function Workspace() {
   const handleIgnoreIssue = useCallback((issueId: string) => {
     setIssueResolved((prev) => ({ ...prev, [issueId]: "ignored" }));
   }, []);
+
+  function handleApplyFullRewrite() {
+    if (!result?.proposedText) return;
+    setText(result.proposedText);
+    setResult(null);
+    setIssueResolved({});
+    setCheckBaselineText(null);
+    setViewChanges(false);
+    setActiveIssueId(null);
+    setActiveQuote(null);
+    setError(null);
+  }
 
   function handleApplyAllIssues() {
     const issues = result?.check?.issues;
@@ -357,9 +369,12 @@ export function Workspace() {
   const canRun = text.trim().length >= 20;
   const showIssueUnderlines =
     pendingCheckCount > 0 && Boolean(result?.check);
+  const proposedText = result?.proposedText ?? null;
   const canViewChanges =
     Boolean(result?.check && checkBaselineText) &&
-    (pendingCheckCount > 0 || text !== checkBaselineText);
+    (pendingCheckCount > 0 ||
+      text !== checkBaselineText ||
+      Boolean(proposedText));
 
   useEffect(() => {
     if (!canViewChanges) setViewChanges(false);
@@ -516,6 +531,7 @@ export function Workspace() {
                     showIssueUnderlines={showIssueUnderlines && !viewChanges}
                     viewChanges={viewChanges}
                     checkBaselineText={checkBaselineText}
+                    proposedText={proposedText}
                     pendingIssueCount={pendingCheckCount}
                     activeQuote={activeQuote}
                     activeIssueId={activeIssue?.id ?? null}
@@ -543,6 +559,7 @@ export function Workspace() {
                 showIssueUnderlines={showIssueUnderlines && !viewChanges}
                 viewChanges={viewChanges}
                 checkBaselineText={checkBaselineText}
+                proposedText={proposedText}
                 pendingIssueCount={pendingCheckCount}
                 activeQuote={activeQuote}
                 activeIssueId={activeIssue?.id ?? null}
@@ -587,6 +604,8 @@ export function Workspace() {
             checkMeta={result?.meta ?? null}
             checkHistory={checkHistory}
             activeIssueId={activeIssue?.id ?? null}
+            proposedText={proposedText}
+            onApplyFullRewrite={handleApplyFullRewrite}
           />
         </aside>
           }

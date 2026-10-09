@@ -1,62 +1,74 @@
 import type { CheckDirectionId } from "./check-directions";
-import { applyDirectionIssueFilter } from "./filter-check";
-import { mergeChunkResults } from "./normalize-check";
+import { buildIssuesFromRewriteDiff } from "./diff-to-issues";
+import { finalizeCheckResult } from "./filter-check";
+import { REWRITE_MAX_CHARS, usesRewriteMode } from "./rewrite-directions";
 import type { AnalyzeMeta, CheckIssue, CheckResult } from "./schemas";
 import { splitTextIntoChunks } from "./text-chunks";
-
-type ChunkResponse = {
-  check: CheckResult;
-  dropped: number;
-  retries: number;
-  usage?: AnalyzeMeta["usage"];
-};
 
 export type CheckProgress = {
   current: number;
   total: number;
 };
 
+type RewriteChunkResponse = {
+  text: string;
+  summary: string;
+  retries: number;
+  usage?: AnalyzeMeta["usage"];
+};
+
 export async function runCheckWithProgress(
   text: string,
   direction: CheckDirectionId,
   onProgress: (progress: CheckProgress) => void,
-): Promise<{ check: CheckResult; meta: AnalyzeMeta }> {
+): Promise<{
+  check: CheckResult;
+  meta: AnalyzeMeta;
+  proposedText?: string;
+}> {
+  if (!usesRewriteMode(direction)) {
+    throw new Error("不支持的检查方向");
+  }
+
+  if (text.length > REWRITE_MAX_CHARS) {
+    throw new Error(`正文超过 ${REWRITE_MAX_CHARS} 字上限`);
+  }
+
   const started = Date.now();
   const chunks = splitTextIntoChunks(text);
   onProgress({ current: 0, total: chunks.length });
 
-  const partialResults: CheckResult[] = [];
-  let totalDropped = 0;
+  const rewrittenParts: string[] = [];
+  const summaries: string[] = [];
   let totalRetries = 0;
-  let degraded: string | undefined;
-  let usageSum: ChunkResponse["usage"];
+  let usageSum: AnalyzeMeta["usage"];
   let lastError: string | undefined;
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i]!;
     onProgress({ current: i, total: chunks.length });
 
-    const res = await fetch("/api/analyze/chunk", {
+    const res = await fetch("/api/analyze/rewrite/chunk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fullText: text,
         chunk,
         direction,
+        totalChunks: chunks.length,
       }),
     });
     const data = await res.json();
     if (!res.ok) {
       lastError =
-        typeof data.error === "string" ? data.error : "分段检查失败";
-      degraded = "部分分段检查失败，已跳过该段；可缩短正文或重试。";
-      continue;
+        typeof data.error === "string" ? data.error : "分段改写失败";
+      throw new Error(lastError);
     }
-    const payload = data as ChunkResponse;
-    totalDropped += payload.dropped;
+
+    const payload = data as RewriteChunkResponse;
+    rewrittenParts.push(payload.text);
+    summaries.push(payload.summary);
     totalRetries += payload.retries;
-    partialResults.push(payload.check);
-    onProgress({ current: i + 1, total: chunks.length });
     if (payload.usage) {
       usageSum = {
         inputTokens:
@@ -67,32 +79,41 @@ export async function runCheckWithProgress(
           (usageSum?.totalTokens ?? 0) + (payload.usage.totalTokens ?? 0),
       };
     }
+    onProgress({ current: i + 1, total: chunks.length });
   }
 
-  if (partialResults.length === 0) {
-    throw new Error(lastError ?? "检查未返回有效结果，请重试");
-  }
+  const proposedText = rewrittenParts.join("");
+  const summary =
+    summaries.length === 1
+      ? summaries[0]!
+      : summaries.filter(Boolean).slice(0, 2).join("；") ||
+        "已完成分段全文改写。";
 
-  const check = applyDirectionIssueFilter(
-    mergeChunkResults(partialResults),
-    direction,
-  );
+  const rawCheck: CheckResult = {
+    summary,
+    issues: buildIssuesFromRewriteDiff(text, proposedText, direction),
+  };
+  const check = finalizeCheckResult(rawCheck, text, direction);
   const durationMs = Date.now() - started;
 
   return {
     check,
+    proposedText,
     meta: {
       durationMs,
       chunkCount: chunks.length,
-      droppedIssueCount: totalDropped,
+      droppedIssueCount: Math.max(
+        0,
+        rawCheck.issues.length - check.issues.length,
+      ),
       retryCount: totalRetries,
       usage: usageSum,
-      degraded,
+      mode: "rewrite",
     },
   };
 }
 
-/** 仅对正文某一区间重新检查，用于单条 issue 刷新建议 */
+/** 仅对正文某一区间重新检查（改写该片段并 diff） */
 export async function recheckIssueSpan(
   fullText: string,
   issue: CheckIssue,
@@ -104,13 +125,13 @@ export async function recheckIssueSpan(
   const snippet = fullText.slice(start, end);
   if (snippet.length < 20) return null;
 
-  const { check } = await runCheckWithProgress(
+  const { proposedText, check } = await runCheckWithProgress(
     snippet,
     direction,
     () => {},
   );
 
-  if (check.issues.length === 0) return null;
+  if (!proposedText || check.issues.length === 0) return null;
 
   const localQuote = fullText.slice(issue.start, issue.end);
   const match =
