@@ -60,12 +60,9 @@ export type AnalyzeMeta = {
     totalTokens?: number;
   };
   degraded?: string;
-  mode?: "rewrite" | "issues";
 };
 
 export type AnalyzeResponse = {
   check: CheckResult;
   meta?: AnalyzeMeta;
-  /** 全文改写模式下的完整改后稿（改动点由 diff 生成） */
-  proposedText?: string;
 };

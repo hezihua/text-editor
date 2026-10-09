@@ -26,7 +26,6 @@ export type RunCheckResult = {
     retryCount: number;
     usage?: ReturnType<typeof usageToMetrics>;
     degraded?: string;
-    mode?: "issues";
   };
 };
 
@@ -110,7 +109,6 @@ export async function runCheck({
       retryCount: totalRetries,
       usage: usageToMetrics(totalUsage),
       degraded,
-      mode: "issues",
     },
   };
 }

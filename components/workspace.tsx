@@ -240,18 +240,6 @@ export function Workspace() {
     setIssueResolved((prev) => ({ ...prev, [issueId]: "ignored" }));
   }, []);
 
-  function handleApplyFullRewrite() {
-    if (!result?.proposedText) return;
-    setText(result.proposedText);
-    setResult(null);
-    setIssueResolved({});
-    setCheckBaselineText(null);
-    setViewChanges(false);
-    setActiveIssueId(null);
-    setActiveQuote(null);
-    setError(null);
-  }
-
   function handleApplyAllIssues() {
     const issues = result?.check?.issues;
     if (!issues) return;
@@ -369,12 +357,9 @@ export function Workspace() {
   const canRun = text.trim().length >= 20;
   const showIssueUnderlines =
     pendingCheckCount > 0 && Boolean(result?.check);
-  const proposedText = result?.proposedText ?? null;
   const canViewChanges =
     Boolean(result?.check && checkBaselineText) &&
-    (pendingCheckCount > 0 ||
-      text !== checkBaselineText ||
-      Boolean(proposedText));
+    (pendingCheckCount > 0 || text !== checkBaselineText);
 
   useEffect(() => {
     if (!canViewChanges) setViewChanges(false);
@@ -531,7 +516,6 @@ export function Workspace() {
                     showIssueUnderlines={showIssueUnderlines && !viewChanges}
                     viewChanges={viewChanges}
                     checkBaselineText={checkBaselineText}
-                    proposedText={proposedText}
                     pendingIssueCount={pendingCheckCount}
                     activeQuote={activeQuote}
                     activeIssueId={activeIssue?.id ?? null}
@@ -559,7 +543,6 @@ export function Workspace() {
                 showIssueUnderlines={showIssueUnderlines && !viewChanges}
                 viewChanges={viewChanges}
                 checkBaselineText={checkBaselineText}
-                proposedText={proposedText}
                 pendingIssueCount={pendingCheckCount}
                 activeQuote={activeQuote}
                 activeIssueId={activeIssue?.id ?? null}
@@ -604,8 +587,6 @@ export function Workspace() {
             checkMeta={result?.meta ?? null}
             checkHistory={checkHistory}
             activeIssueId={activeIssue?.id ?? null}
-            proposedText={proposedText}
-            onApplyFullRewrite={handleApplyFullRewrite}
           />
         </aside>
           }

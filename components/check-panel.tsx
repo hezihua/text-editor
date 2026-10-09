@@ -47,8 +47,6 @@ type CheckPanelProps = {
   checkMeta?: AnalyzeMeta | null;
   checkHistory: CheckHistoryEntry[];
   activeIssueId: string | null;
-  proposedText?: string | null;
-  onApplyFullRewrite?: () => void;
 };
 
 export function CheckPanel({
@@ -71,8 +69,6 @@ export function CheckPanel({
   checkMeta,
   checkHistory,
   activeIssueId,
-  proposedText,
-  onApplyFullRewrite,
 }: CheckPanelProps) {
   const visibleIssues = useMemo(() => {
     if (!check) return [];
@@ -150,20 +146,10 @@ export function CheckPanel({
           <CheckRunStats meta={checkMeta} issueCount={check.issues.length} />
         )}
 
-        {check && checkMeta?.mode === "issues" && (
+        {check && (
           <p className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-600">
-            模型逐条给出原文片段与修改建议（Text-Well 式），右侧高亮定位，可应用、忽略或编辑后再应用。
+            模型逐条给出原文片段与修改建议，编辑器内高亮定位，可逐条应用或忽略。
           </p>
-        )}
-
-        {proposedText && onApplyFullRewrite && (
-          <button
-            type="button"
-            onClick={onApplyFullRewrite}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-900 bg-stone-900 py-2.5 text-sm font-medium text-white hover:bg-stone-800"
-          >
-            应用全文改写
-          </button>
         )}
 
         {check && (

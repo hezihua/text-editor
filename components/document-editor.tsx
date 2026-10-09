@@ -30,7 +30,6 @@ type DocumentEditorProps = {
   showIssueUnderlines?: boolean;
   viewChanges?: boolean;
   checkBaselineText?: string | null;
-  proposedText?: string | null;
   pendingIssueCount?: number;
   activeQuote?: string | null;
   activeIssueId?: string | null;
@@ -52,7 +51,6 @@ export const DocumentEditor = forwardRef<
     showIssueUnderlines = false,
     viewChanges = false,
     checkBaselineText = null,
-    proposedText = null,
     pendingIssueCount = 0,
     activeQuote = null,
     activeIssueId = null,
@@ -74,17 +72,13 @@ export const DocumentEditor = forwardRef<
       },
     ];
 
-    if (viewChanges && checkBaselineText) {
-      if (
-        proposedText &&
-        text === checkBaselineText &&
-        proposedText !== checkBaselineText
-      ) {
-        return buildDocumentDiffPieces(checkBaselineText, proposedText);
-      }
-      if (pendingIssueCount === 0 && text !== checkBaselineText) {
-        return buildDocumentDiffPieces(checkBaselineText, text);
-      }
+    if (
+      viewChanges &&
+      checkBaselineText &&
+      pendingIssueCount === 0 &&
+      text !== checkBaselineText
+    ) {
+      return buildDocumentDiffPieces(checkBaselineText, text);
     }
 
     if (checkIssues.length === 0) return plain;
@@ -112,7 +106,6 @@ export const DocumentEditor = forwardRef<
     text,
     viewChanges,
     checkBaselineText,
-    proposedText,
     pendingIssueCount,
     showIssueUnderlines,
     activeQuote,
@@ -125,9 +118,7 @@ export const DocumentEditor = forwardRef<
     if (
       viewChanges &&
       checkBaselineText &&
-      (pendingIssueCount > 0 ||
-        text !== checkBaselineText ||
-        Boolean(proposedText))
+      (pendingIssueCount > 0 || text !== checkBaselineText)
     ) {
       return true;
     }
@@ -136,7 +127,6 @@ export const DocumentEditor = forwardRef<
     text,
     viewChanges,
     checkBaselineText,
-    proposedText,
     pendingIssueCount,
     showIssueUnderlines,
   ]);

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       direction: body.direction ?? "basic",
     });
 
-    const result: AnalyzeResponse = { check, meta: { ...meta, mode: "issues" } };
+    const result: AnalyzeResponse = { check, meta };
     return NextResponse.json(result);
   } catch (err) {
     if (err instanceof z.ZodError) {

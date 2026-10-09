@@ -110,7 +110,6 @@ export async function runCheckWithProgress(
         totalDropped + Math.max(0, rawIssueCount - check.issues.length),
       retryCount: totalRetries,
       usage: usageSum,
-      mode: "issues",
       degraded,
     },
   };

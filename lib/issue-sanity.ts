@@ -190,16 +190,11 @@ function isBrokenBoundarySwap(fullText: string, issue: CheckIssue): boolean {
   return /^[\u4e00-\u9fa5a-zA-Z0-9「『（(]/.test(after);
 }
 
-function isProgrammaticDiffIssue(issue: CheckIssue): boolean {
-  return issue.message === "由全文改写对比自动生成";
-}
-
 export function filterUnsafeIssues(
   issues: CheckIssue[],
   fullText: string,
 ): CheckIssue[] {
   return issues.filter((issue) => {
-    if (isProgrammaticDiffIssue(issue)) return true;
     if (isEnglishOnlyTitle(issue)) return false;
     if (isAbsurdTitleToGreetingSwap(issue)) return false;
     if (isFirstLineTitleDestroyed(fullText, issue)) return false;

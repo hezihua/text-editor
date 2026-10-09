@@ -9,7 +9,6 @@ import { resolve } from "node:path";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 
-import { buildIssuesFromRewriteDiff } from "../lib/diff-to-issues";
 import { filterUnsafeIssues } from "../lib/issue-sanity";
 import { normalizeChunkCheck } from "../lib/normalize-check";
 import { LIVE_FIXTURES, OFFLINE_FIXTURES } from "../lib/regression/fixtures";
@@ -30,18 +29,6 @@ function runOffline() {
     chunks.every((c, i) => c.index === i && c.offset >= 0),
     "chunk index/offset 应合法",
   );
-
-  console.log("— 离线：rewrite diff —");
-  const before = "各位同事好。\n\n接下来我们会优先保证核心流程。";
-  const after = "大家好。\n\n接下来会优先保障核心流程。";
-  const diffIssues = buildIssuesFromRewriteDiff(before, after);
-  assert(diffIssues.length >= 2, "应对每处差异生成 issue");
-  assert(
-    before.slice(diffIssues[0]!.start, diffIssues[0]!.end) ===
-      diffIssues[0]!.quote,
-    "diff issue 偏移应准确",
-  );
-  console.log("  ✓ diff-to-issues");
 
   console.log("— 离线：语义 sanity —");
   const sampleDoc =
