@@ -52,7 +52,10 @@ export type CheckResult = {
 export type AnalyzeMeta = {
   durationMs: number;
   chunkCount: number;
-  droppedIssueCount: number;
+  /** 仅统计无法在正文定位的条数（用于提示用户） */
+  droppedLocateCount: number;
+  /** @deprecated 内部/日志用，等于 droppedLocateCount */
+  droppedIssueCount?: number;
   retryCount: number;
   usage?: {
     inputTokens?: number;

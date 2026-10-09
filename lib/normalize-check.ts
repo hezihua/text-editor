@@ -14,9 +14,16 @@ import {
 
 const rawCheckResultSchema = checkResultSchema;
 
+export type NormalizeDropStats = {
+  /** 模型 quote/偏移无法在正文对齐 */
+  locate: number;
+  /** 多条圈选重叠，合并为一条 */
+  duplicate: number;
+};
+
 export type NormalizeResult = {
   check: CheckResult;
-  dropped: number;
+  dropped: NormalizeDropStats;
   warnings: string[];
 };
 
@@ -49,12 +56,12 @@ export function normalizeChunkCheck(
 
   const warnings: string[] = [];
   const issues: CheckIssue[] = [];
-  let dropped = 0;
+  const dropped: NormalizeDropStats = { locate: 0, duplicate: 0 };
 
   parsed.data.issues.forEach((issue, localIndex) => {
     const single = checkIssueModelSchema.safeParse(issue);
     if (!single.success) {
-      dropped += 1;
+      dropped.locate += 1;
       return;
     }
 
@@ -70,35 +77,29 @@ export function normalizeChunkCheck(
       end: hintEnd,
     });
     if (!local) {
-      dropped += 1;
+      dropped.locate += 1;
       return;
     }
 
-    const globalHint = {
-      start: chunk.offset + local[0],
-      end: chunk.offset + local[1],
-    };
-    const global = locateIssueInText(
-      fullText,
-      single.data.quote,
-      globalHint,
-    );
-    if (!global) {
-      dropped += 1;
+    const globalStart = chunk.offset + local[0];
+    const globalEnd = chunk.offset + local[1];
+    const canonicalQuote = fullText.slice(globalStart, globalEnd);
+    if (!canonicalQuote || globalEnd > fullText.length) {
+      dropped.locate += 1;
       return;
     }
 
     issues.push({
       ...single.data,
       id: `c${chunk.index}-i${localIndex + 1}`,
-      start: global[0],
-      end: global[1],
-      quote: fullText.slice(global[0], global[1]),
+      start: globalStart,
+      end: globalEnd,
+      quote: canonicalQuote,
     });
   });
 
   const merged = dedupeIssues(issues);
-  dropped += issues.length - merged.length;
+  dropped.duplicate += issues.length - merged.length;
 
   return {
     check: {

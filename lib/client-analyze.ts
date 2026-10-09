@@ -13,7 +13,7 @@ export type CheckProgress = {
 
 type ChunkCheckResponse = {
   check: CheckResult;
-  dropped: number;
+  droppedLocate?: number;
   retries: number;
   usage?: AnalyzeMeta["usage"];
 };
@@ -49,7 +49,7 @@ export async function runCheckWithProgress(
 
   let completed = 0;
   let totalRetries = 0;
-  let totalDropped = 0;
+  let totalDroppedLocate = 0;
   let usageSum: AnalyzeMeta["usage"];
   let degraded: string | undefined;
 
@@ -76,7 +76,7 @@ export async function runCheckWithProgress(
 
         const payload = data as ChunkCheckResponse;
         totalRetries += payload.retries;
-        totalDropped += payload.dropped ?? 0;
+        totalDroppedLocate += payload.droppedLocate ?? 0;
         usageSum = sumUsage(usageSum, payload.usage);
         completed += 1;
         onProgress({ current: completed, total: chunks.length });
@@ -97,8 +97,7 @@ export async function runCheckWithProgress(
   }
 
   const merged = mergeChunkResults(valid);
-  const rawIssueCount = merged.issues.length;
-  const check = finalizeCheckResult(merged, text, direction);
+  const { check } = finalizeCheckResult(merged, text, direction);
   const durationMs = Date.now() - started;
 
   return {
@@ -106,8 +105,8 @@ export async function runCheckWithProgress(
     meta: {
       durationMs,
       chunkCount: chunks.length,
-      droppedIssueCount:
-        totalDropped + Math.max(0, rawIssueCount - check.issues.length),
+      droppedLocateCount: totalDroppedLocate,
+      droppedIssueCount: totalDroppedLocate,
       retryCount: totalRetries,
       usage: usageSum,
       degraded,
@@ -140,7 +139,7 @@ export async function recheckIssueSpan(
   if (!res.ok) return null;
 
   const payload = data as ChunkCheckResponse;
-  const check = finalizeCheckResult(payload.check, snippet, direction);
+  const { check } = finalizeCheckResult(payload.check, snippet, direction);
   if (check.issues.length === 0) return null;
 
   const localQuote = fullText.slice(issue.start, issue.end);

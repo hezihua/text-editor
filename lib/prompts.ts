@@ -40,7 +40,7 @@ const UNIVERSAL_ALIGNMENT_RULES = `
 const GENERAL_RULES = `
 通用要求：
 - 每条 issue 必须有简短 title
-- quote 必须从正文原样复制（含标点、引号「」""、emoji，一字不差）；suggestion 用于替换 quote 的完整片段
+- quote 必须从正文原样复制（含标点、引号「」""、emoji，一字不差）；不得自行加 Markdown 列表符或省略号；suggestion 用于替换 quote 的完整片段
 - 每条 issue 必须提供 start、end：0-based 字符下标，左闭右开，且 text.slice(start,end) 必须与 quote 完全一致
 - id 可省略（服务端会生成）；若填写请用简短数字字符串
 - 全部使用简体中文
@@ -94,7 +94,8 @@ export function buildCheckPromptStrict(
 重要：上次输出未通过校验。请严格输出 JSON：
 ${basicExtra}
 - 再次确认：title/message 与 quote 语义一致，禁止标题/问候错位
-- summary 1–500 字
+- summary 1–500 字（总评全文，勿把某一条 issue 的说明写进 summary 却不在 issues 里给出对应 quote）
+- 每条 issue 的 message 只描述该条 quote，勿写「拆分上文长句」而 quote 却是另一行的短句
 - issues 每项含 category、severity、title、quote、message、suggestion、start、end
 - start/end 为**上方正文片段内**的 0-based 下标（左闭右开），必须与 quote 对齐；quote 与正文必须逐字一致（含标点、空格）
 - 不要输出正文以外的片段`;

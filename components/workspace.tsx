@@ -142,9 +142,9 @@ export function Workspace() {
       setResult(payload);
       if (meta.degraded) {
         setError(meta.degraded);
-      } else if (meta.droppedIssueCount) {
+      } else if (meta.droppedLocateCount > 0) {
         setError(
-          `有 ${meta.droppedIssueCount} 条建议因无法定位已自动忽略。`,
+          `有 ${meta.droppedLocateCount} 条建议因无法在正文中定位（quote 与原文不一致）已忽略，可重试检查或换模型。`,
         );
       } else {
         setError(null);

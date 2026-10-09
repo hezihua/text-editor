@@ -25,14 +25,23 @@ export function applyDirectionIssueFilter(
   };
 }
 
+export type FinalizeCheckResult = {
+  check: CheckResult;
+  /** 语义/衔接类过滤（不向用户提示） */
+  droppedUnsafe: number;
+};
+
 /** 方向过滤 + 语义/错位类建议剔除 */
 export function finalizeCheckResult(
   check: CheckResult,
   fullText: string,
   direction: CheckDirectionId,
-): CheckResult {
-  return applyIssueSanityFilter(
-    applyDirectionIssueFilter(check, direction),
-    fullText,
-  );
+): FinalizeCheckResult {
+  const afterDirection = applyDirectionIssueFilter(check, direction);
+  const beforeSanity = afterDirection.issues.length;
+  const afterSanity = applyIssueSanityFilter(afterDirection, fullText);
+  return {
+    check: afterSanity,
+    droppedUnsafe: Math.max(0, beforeSanity - afterSanity.issues.length),
+  };
 }

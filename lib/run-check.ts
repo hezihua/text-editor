@@ -22,7 +22,7 @@ export type RunCheckResult = {
   meta: {
     durationMs: number;
     chunkCount: number;
-    droppedIssueCount: number;
+    droppedLocateCount: number;
     retryCount: number;
     usage?: ReturnType<typeof usageToMetrics>;
     degraded?: string;
@@ -36,7 +36,7 @@ export async function runCheck({
   const started = Date.now();
   const chunks = splitTextIntoChunks(text);
   let totalUsage: LanguageModelUsage | undefined;
-  let totalDropped = 0;
+  let totalDroppedLocate = 0;
   let totalRetries = 0;
   let degraded: string | undefined;
 
@@ -53,7 +53,7 @@ export async function runCheck({
         totalUsage = sumUsage(totalUsage, usage);
 
         const normalized = normalizeChunkCheck(raw, chunk, text);
-        totalDropped += normalized.dropped;
+        totalDroppedLocate += normalized.dropped.locate;
         partialResults.push(normalized.check);
       } catch {
         totalRetries += 1;
@@ -73,14 +73,14 @@ export async function runCheck({
       textLength: text.length,
       chunkCount: chunks.length,
       issueCount: 0,
-      droppedIssueCount: totalDropped,
+      droppedIssueCount: totalDroppedLocate,
       retryCount: totalRetries,
       error: err.message,
     });
     throw err;
   }
 
-  const check = finalizeCheckResult(
+  const { check } = finalizeCheckResult(
     mergeChunkResults(partialResults),
     text,
     direction,
@@ -95,7 +95,7 @@ export async function runCheck({
     textLength: text.length,
     chunkCount: chunks.length,
     issueCount: check.issues.length,
-    droppedIssueCount: totalDropped,
+    droppedIssueCount: totalDroppedLocate,
     retryCount: totalRetries,
     usage: usageToMetrics(totalUsage),
   });
@@ -105,7 +105,7 @@ export async function runCheck({
     meta: {
       durationMs,
       chunkCount: chunks.length,
-      droppedIssueCount: totalDropped,
+      droppedLocateCount: totalDroppedLocate,
       retryCount: totalRetries,
       usage: usageToMetrics(totalUsage),
       degraded,

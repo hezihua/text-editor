@@ -38,6 +38,29 @@ const TOPIC_QUOTE_RULES: {
   },
 ];
 
+/** message/title 描述长句拆分、数字格式等，但 quote 明显不是该片段 */
+function isMessageSpanMismatch(issue: CheckIssue): boolean {
+  const blob = `${issue.title}\n${issue.message}`;
+  const q = issue.quote.trim();
+
+  if (
+    /长句|拆成|拆分|三个短句|分句|短句/.test(blob) &&
+    q.length < 55 &&
+    (q.length < 28 || (q.match(/[，；：]/g)?.length ?? 0) < 1)
+  ) {
+    return true;
+  }
+
+  if (
+    /时间单位|数字连接|7-14|7至14|自然日|统一数字/.test(blob) &&
+    !/\d|[至到\-—~]/.test(q)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 function isTopicQuoteMismatch(issue: CheckIssue): boolean {
   const blob = `${issue.title}\n${issue.message}`;
   const q = issue.quote.trim();
@@ -271,6 +294,7 @@ export function filterUnsafeIssues(
     if (isEnglishOnlyTitle(issue)) return false;
     if (isAbsurdTitleToGreetingSwap(issue)) return false;
     if (isFirstLineTitleDestroyed(fullText, issue)) return false;
+    if (isMessageSpanMismatch(issue)) return false;
     if (isTopicQuoteMismatch(issue)) return false;
     if (isOverDeletionReplacement(issue)) return false;
     if (isOversizedQuoteSpan(issue)) return false;

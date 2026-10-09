@@ -9,6 +9,10 @@ import { resolve } from "node:path";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 
+import {
+  quoteMatchVariants,
+  stripMarkdownListMarker,
+} from "../lib/issue-range";
 import { filterUnsafeIssues } from "../lib/issue-sanity";
 import { normalizeChunkCheck } from "../lib/normalize-check";
 import { LIVE_FIXTURES, OFFLINE_FIXTURES } from "../lib/regression/fixtures";
@@ -115,6 +119,55 @@ function runOffline() {
   assert(truncatedGreet.length === 0, "应过滤截断问候导致「封信」残片的建议");
   console.log("  ✓ greeting seam");
 
+  const wrongMsg = filterUnsafeIssues(
+    [
+      {
+        id: "m",
+        category: "clarity",
+        severity: "medium",
+        title: "拆分长句",
+        quote: "欢迎各团队调配资源参与联调支持",
+        message: "建议将上文长句拆分为三个短句",
+        suggestion: "欢迎各团队提供联调支持",
+        start: 0,
+        end: 16,
+      },
+    ],
+    "欢迎各团队调配资源参与联调支持。",
+  );
+  assert(wrongMsg.length === 0, "应过滤 message 与 quote 主题不符");
+  console.log("  ✓ message-span mismatch");
+
+  const semi = quoteMatchVariants("因文档缺漏;导致延期");
+  assert(semi.some((v) => v.includes("；")), "标点变体应含全角分号");
+  console.log("  ✓ quote variants");
+
+  assert(
+    stripMarkdownListMarker("- 欢迎各团队提供支持") === "欢迎各团队提供支持",
+    "应去掉列表前缀",
+  );
+
+  const listDoc = "欢迎各团队调配资源参与联调支持。";
+  const listNorm = normalizeChunkCheck(
+    {
+      summary: "简练",
+      issues: [
+        {
+          category: "clarity",
+          severity: "medium",
+          title: "简练",
+          quote: "- 欢迎各团队调配资源参与联调支持",
+          message: "更简洁",
+          suggestion: "欢迎各团队提供联调支持",
+        },
+      ],
+    },
+    { index: 0, text: listDoc, offset: 0 },
+    listDoc,
+  );
+  assert(listNorm.check.issues.length === 1, "带 - 前缀的 quote 应能定位");
+  console.log("  ✓ list-marker locate");
+
   console.log("— 离线：归一化样例 —");
   for (const fx of OFFLINE_FIXTURES) {
     const result = normalizeChunkCheck(
@@ -128,7 +181,7 @@ function runOffline() {
     );
     assert(
       result.check.issues.length === fx.expectIssueCount,
-      `${fx.name}: 期望 ${fx.expectIssueCount} 条，实际 ${result.check.issues.length}（丢弃 ${result.dropped}）`,
+      `${fx.name}: 期望 ${fx.expectIssueCount} 条，实际 ${result.check.issues.length}（无法定位 ${result.dropped.locate}）`,
     );
     for (const cat of fx.expectCategories) {
       assert(

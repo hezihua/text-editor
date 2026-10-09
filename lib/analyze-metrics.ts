@@ -40,8 +40,8 @@ export function formatAnalyzeMeta(meta: AnalyzeMeta, issueCount: number): string
   if (meta.retryCount > 0) {
     parts.push(`重试 ${meta.retryCount}`);
   }
-  if (meta.droppedIssueCount > 0) {
-    parts.push(`丢弃 ${meta.droppedIssueCount}`);
+  if (meta.droppedLocateCount > 0) {
+    parts.push(`无法定位 ${meta.droppedLocateCount}`);
   }
   return parts.join(" · ");
 }

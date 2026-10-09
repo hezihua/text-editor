@@ -34,11 +34,16 @@ export async function POST(req: Request) {
       body.fullText,
     );
 
-    const check = finalizeCheckResult(normalized.check, body.fullText, direction);
+    const { check } = finalizeCheckResult(
+      normalized.check,
+      body.fullText,
+      direction,
+    );
 
     return NextResponse.json({
       check,
-      dropped: normalized.dropped,
+      droppedLocate: normalized.dropped.locate,
+      droppedDuplicate: normalized.dropped.duplicate,
       retries,
       usage: usageToMetrics(usage),
     });
