@@ -13,7 +13,7 @@ import { buildIssuesFromRewriteDiff } from "../lib/diff-to-issues";
 import { filterUnsafeIssues } from "../lib/issue-sanity";
 import { normalizeChunkCheck } from "../lib/normalize-check";
 import { LIVE_FIXTURES, OFFLINE_FIXTURES } from "../lib/regression/fixtures";
-import { runRewriteCheck } from "../lib/run-rewrite";
+import { runCheck } from "../lib/run-check";
 import { splitTextIntoChunks } from "../lib/text-chunks";
 
 function assert(condition: boolean, message: string) {
@@ -145,9 +145,12 @@ async function runLive() {
     return;
   }
 
-  console.log("— Live：runRewriteCheck —");
+  console.log("— Live：runCheck —");
   for (const fx of LIVE_FIXTURES) {
-    const { check, meta } = await runRewriteCheck(fx.text, fx.direction);
+    const { check, meta } = await runCheck({
+      text: fx.text,
+      direction: fx.direction,
+    });
     const min = fx.minIssues ?? 1;
     assert(
       check.issues.length >= min,

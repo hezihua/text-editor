@@ -1,8 +1,8 @@
 import { toUserFacingApiError } from "./api-error-message";
 import type { CheckDirectionId } from "./check-directions";
-import { buildIssuesFromRewriteDiff } from "./diff-to-issues";
 import { finalizeCheckResult } from "./filter-check";
-import { REWRITE_MAX_CHARS, usesRewriteMode } from "./rewrite-directions";
+import { mergeChunkResults } from "./normalize-check";
+import { ANALYZE_MAX_CHARS } from "./analyze-limits";
 import type { AnalyzeMeta, CheckIssue, CheckResult } from "./schemas";
 import { splitTextIntoChunks } from "./text-chunks";
 
@@ -11,13 +11,26 @@ export type CheckProgress = {
   total: number;
 };
 
-type RewriteChunkResponse = {
-  text: string;
-  summary: string;
+type ChunkCheckResponse = {
+  check: CheckResult;
+  dropped: number;
   retries: number;
   usage?: AnalyzeMeta["usage"];
 };
 
+function sumUsage(
+  a: AnalyzeMeta["usage"] | undefined,
+  b: AnalyzeMeta["usage"] | undefined,
+): AnalyzeMeta["usage"] | undefined {
+  if (!b) return a;
+  return {
+    inputTokens: (a?.inputTokens ?? 0) + (b.inputTokens ?? 0),
+    outputTokens: (a?.outputTokens ?? 0) + (b.outputTokens ?? 0),
+    totalTokens: (a?.totalTokens ?? 0) + (b.totalTokens ?? 0),
+  };
+}
+
+/** Text-Well 式：规则分段 + 并发调用模型，返回结构化 issue（quote/start/end/suggestion） */
 export async function runCheckWithProgress(
   text: string,
   direction: CheckDirectionId,
@@ -25,97 +38,85 @@ export async function runCheckWithProgress(
 ): Promise<{
   check: CheckResult;
   meta: AnalyzeMeta;
-  proposedText?: string;
 }> {
-  if (!usesRewriteMode(direction)) {
-    throw new Error("不支持的检查方向");
-  }
-
-  if (text.length > REWRITE_MAX_CHARS) {
-    throw new Error(`正文超过 ${REWRITE_MAX_CHARS} 字上限`);
+  if (text.length > ANALYZE_MAX_CHARS) {
+    throw new Error(`正文超过 ${ANALYZE_MAX_CHARS} 字上限`);
   }
 
   const started = Date.now();
   const chunks = splitTextIntoChunks(text);
   onProgress({ current: 0, total: chunks.length });
 
-  const rewrittenParts: string[] = [];
-  const summaries: string[] = [];
+  let completed = 0;
   let totalRetries = 0;
+  let totalDropped = 0;
   let usageSum: AnalyzeMeta["usage"];
-  let lastError: string | undefined;
+  let degraded: string | undefined;
 
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i]!;
-    onProgress({ current: i, total: chunks.length });
+  const partials = await Promise.all(
+    chunks.map(async (chunk) => {
+      try {
+        const res = await fetch("/api/analyze/chunk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullText: text,
+            chunk,
+            direction,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(
+            toUserFacingApiError(
+              typeof data.error === "string" ? data.error : "分段检查失败",
+            ),
+          );
+        }
 
-    const res = await fetch("/api/analyze/rewrite/chunk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullText: text,
-        chunk,
-        direction,
-        totalChunks: chunks.length,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      lastError = toUserFacingApiError(
-        typeof data.error === "string" ? data.error : "分段改写失败",
-      );
-      throw new Error(lastError);
-    }
+        const payload = data as ChunkCheckResponse;
+        totalRetries += payload.retries;
+        totalDropped += payload.dropped ?? 0;
+        usageSum = sumUsage(usageSum, payload.usage);
+        completed += 1;
+        onProgress({ current: completed, total: chunks.length });
+        return payload.check;
+      } catch (e) {
+        completed += 1;
+        onProgress({ current: completed, total: chunks.length });
+        degraded =
+          "部分分段检查失败，已跳过该段；建议缩短正文或重试。";
+        return null;
+      }
+    }),
+  );
 
-    const payload = data as RewriteChunkResponse;
-    rewrittenParts.push(payload.text);
-    summaries.push(payload.summary);
-    totalRetries += payload.retries;
-    if (payload.usage) {
-      usageSum = {
-        inputTokens:
-          (usageSum?.inputTokens ?? 0) + (payload.usage.inputTokens ?? 0),
-        outputTokens:
-          (usageSum?.outputTokens ?? 0) + (payload.usage.outputTokens ?? 0),
-        totalTokens:
-          (usageSum?.totalTokens ?? 0) + (payload.usage.totalTokens ?? 0),
-      };
-    }
-    onProgress({ current: i + 1, total: chunks.length });
+  const valid = partials.filter((p): p is CheckResult => p != null);
+  if (valid.length === 0) {
+    throw new Error("检查未返回有效结果，请重试");
   }
 
-  const proposedText = rewrittenParts.join("");
-  const summary =
-    summaries.length === 1
-      ? summaries[0]!
-      : summaries.filter(Boolean).slice(0, 2).join("；") ||
-        "已完成分段全文改写。";
-
-  const rawCheck: CheckResult = {
-    summary,
-    issues: buildIssuesFromRewriteDiff(text, proposedText, direction),
-  };
-  const check = finalizeCheckResult(rawCheck, text, direction);
+  const merged = mergeChunkResults(valid);
+  const rawIssueCount = merged.issues.length;
+  const check = finalizeCheckResult(merged, text, direction);
   const durationMs = Date.now() - started;
 
   return {
     check,
-    proposedText,
     meta: {
       durationMs,
       chunkCount: chunks.length,
-      droppedIssueCount: Math.max(
-        0,
-        rawCheck.issues.length - check.issues.length,
-      ),
+      droppedIssueCount:
+        totalDropped + Math.max(0, rawIssueCount - check.issues.length),
       retryCount: totalRetries,
       usage: usageSum,
-      mode: "rewrite",
+      mode: "issues",
+      degraded,
     },
   };
 }
 
-/** 仅对正文某一区间重新检查（改写该片段并 diff） */
+/** 仅对正文某一区间重新检查（带上下文的片段走单块 issue 检查） */
 export async function recheckIssueSpan(
   fullText: string,
   issue: CheckIssue,
@@ -127,21 +128,28 @@ export async function recheckIssueSpan(
   const snippet = fullText.slice(start, end);
   if (snippet.length < 20) return null;
 
-  const { proposedText, check } = await runCheckWithProgress(
-    snippet,
-    direction,
-    () => {},
-  );
+  const res = await fetch("/api/analyze/chunk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      fullText: snippet,
+      chunk: { index: 0, text: snippet, offset: 0 },
+      direction,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) return null;
 
-  if (!proposedText || check.issues.length === 0) return null;
+  const payload = data as ChunkCheckResponse;
+  const check = finalizeCheckResult(payload.check, snippet, direction);
+  if (check.issues.length === 0) return null;
 
   const localQuote = fullText.slice(issue.start, issue.end);
   const match =
     check.issues.find((i) => i.quote === localQuote) ??
     check.issues.find(
       (i) =>
-        i.start + start <= issue.end &&
-        i.end + start >= issue.start,
+        i.start + start <= issue.end && i.end + start >= issue.start,
     ) ??
     check.issues[0];
 

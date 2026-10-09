@@ -150,9 +150,9 @@ export function CheckPanel({
           <CheckRunStats meta={checkMeta} issueCount={check.issues.length} />
         )}
 
-        {check && checkMeta?.mode === "rewrite" && (
+        {check && checkMeta?.mode === "issues" && (
           <p className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-600">
-            已用「全文改写 + 对比 diff」生成改动点，定位由程序计算，可点「查看变更」对比改前/改后，或逐条应用。
+            模型逐条给出原文片段与修改建议（Text-Well 式），右侧高亮定位，可应用、忽略或编辑后再应用。
           </p>
         )}
 

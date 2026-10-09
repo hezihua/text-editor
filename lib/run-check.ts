@@ -26,6 +26,7 @@ export type RunCheckResult = {
     retryCount: number;
     usage?: ReturnType<typeof usageToMetrics>;
     degraded?: string;
+    mode?: "issues";
   };
 };
 
@@ -42,36 +43,26 @@ export async function runCheck({
 
   const partialResults: CheckResult[] = [];
 
-  for (const chunk of chunks) {
-    const { raw, usage, retries } = await checkSingleChunk(
-      chunk.text,
-      direction,
-    );
-    totalRetries += retries;
-    totalUsage = sumUsage(totalUsage, usage);
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      try {
+        const { raw, usage, retries } = await checkSingleChunk(
+          chunk.text,
+          direction,
+        );
+        totalRetries += retries;
+        totalUsage = sumUsage(totalUsage, usage);
 
-    try {
-      const normalized = normalizeChunkCheck(raw, chunk, text);
-      totalDropped += normalized.dropped;
-      partialResults.push(normalized.check);
-    } catch (e) {
-      totalRetries += 1;
-      degraded =
-        "部分分段结果格式异常，已跳过该段；建议缩短正文或重试。";
-      logAnalyzeMetrics({
-        event: "analyze",
-        ok: false,
-        durationMs: Date.now() - started,
-        direction,
-        textLength: text.length,
-        chunkCount: chunks.length,
-        issueCount: 0,
-        droppedIssueCount: totalDropped,
-        retryCount: totalRetries,
-        error: e instanceof Error ? e.message : "normalize_failed",
-      });
-    }
-  }
+        const normalized = normalizeChunkCheck(raw, chunk, text);
+        totalDropped += normalized.dropped;
+        partialResults.push(normalized.check);
+      } catch {
+        totalRetries += 1;
+        degraded =
+          "部分分段结果格式异常，已跳过该段；建议缩短正文或重试。";
+      }
+    }),
+  );
 
   if (partialResults.length === 0) {
     const err = new Error("检查未返回有效结果，请重试");
@@ -119,6 +110,7 @@ export async function runCheck({
       retryCount: totalRetries,
       usage: usageToMetrics(totalUsage),
       degraded,
+      mode: "issues",
     },
   };
 }

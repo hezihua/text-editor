@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { checkDirectionIdSchema } from "@/lib/check-directions";
-import { REWRITE_MAX_CHARS } from "@/lib/rewrite-directions";
-import { runRewriteCheck } from "@/lib/run-rewrite";
+import { ANALYZE_MAX_CHARS } from "@/lib/analyze-limits";
+import { runCheck } from "@/lib/run-check";
 import type { AnalyzeResponse } from "@/lib/schemas";
 
 const requestSchema = z.object({
-  text: z.string().min(20, "正文至少 20 字").max(REWRITE_MAX_CHARS),
+  text: z.string().min(20, "正文至少 20 字").max(ANALYZE_MAX_CHARS),
   direction: checkDirectionIdSchema.optional(),
 });
 
@@ -15,12 +15,12 @@ export async function POST(req: Request) {
   try {
     const body = requestSchema.parse(await req.json());
 
-    const { check, meta, proposedText } = await runRewriteCheck(
-      body.text,
-      body.direction ?? "basic",
-    );
+    const { check, meta } = await runCheck({
+      text: body.text,
+      direction: body.direction ?? "basic",
+    });
 
-    const result: AnalyzeResponse = { check, meta, proposedText };
+    const result: AnalyzeResponse = { check, meta: { ...meta, mode: "issues" } };
     return NextResponse.json(result);
   } catch (err) {
     if (err instanceof z.ZodError) {

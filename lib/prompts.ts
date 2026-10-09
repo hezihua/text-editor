@@ -86,6 +86,6 @@ ${basicExtra}
 - 再次确认：title/message 与 quote 语义一致，禁止标题/问候错位
 - summary 1–500 字
 - issues 每项含 category、severity、title、quote、message、suggestion、start、end
-- start/end 必须精确对应 quote 在上方正文中的位置（JavaScript 字符串下标）
+- start/end 为**上方正文片段内**的 0-based 下标（左闭右开），必须与 quote 对齐；quote 与正文必须逐字一致（含标点、空格）
 - 不要输出正文以外的片段`;
 }

@@ -65,7 +65,7 @@ function findByNormalizedForm(
   return null;
 }
 
-function findByFuzzyWindow(
+export function findByFuzzyWindow(
   text: string,
   quote: string,
   minScore = 0.82,

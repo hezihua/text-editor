@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+import {
+  locateIssueInText,
+  normalizeChunkLocalOffsets,
+} from "./issue-range";
 import type { TextChunk } from "./text-chunks";
-import { findIssueRange } from "./issue-range";
 import {
   checkIssueModelSchema,
   checkResultSchema,
@@ -55,35 +58,32 @@ export function normalizeChunkCheck(
       return;
     }
 
-    const localStart =
-      single.data.start ?? findIssueRange(chunk.text, single.data)?.[0];
-    const localEnd =
-      single.data.end ??
-      (localStart != null
-        ? localStart + single.data.quote.length
-        : undefined);
+    const { start: hintStart, end: hintEnd } = normalizeChunkLocalOffsets(
+      chunk.text.length,
+      chunk.offset,
+      single.data.start,
+      single.data.end,
+    );
 
-    let start = localStart;
-    let end = localEnd;
-
-    if (start == null || end == null) {
-      const range = findIssueRange(chunk.text, single.data);
-      if (!range) {
-        dropped += 1;
-        return;
-      }
-      [start, end] = range;
+    const local = locateIssueInText(chunk.text, single.data.quote, {
+      start: hintStart,
+      end: hintEnd,
+    });
+    if (!local) {
+      dropped += 1;
+      return;
     }
 
-    const globalStart = chunk.offset + start;
-    const globalEnd = chunk.offset + end;
-
-    const located = findIssueRange(fullText, {
-      quote: single.data.quote,
-      start: globalStart,
-      end: globalEnd,
-    });
-    if (!located) {
+    const globalHint = {
+      start: chunk.offset + local[0],
+      end: chunk.offset + local[1],
+    };
+    const global = locateIssueInText(
+      fullText,
+      single.data.quote,
+      globalHint,
+    );
+    if (!global) {
       dropped += 1;
       return;
     }
@@ -91,9 +91,9 @@ export function normalizeChunkCheck(
     issues.push({
       ...single.data,
       id: `c${chunk.index}-i${localIndex + 1}`,
-      start: located[0],
-      end: located[1],
-      quote: fullText.slice(located[0], located[1]),
+      start: global[0],
+      end: global[1],
+      quote: fullText.slice(global[0], global[1]),
     });
   });
 

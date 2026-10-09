@@ -84,6 +84,29 @@ export const OFFLINE_FIXTURES: OfflineNormalizeFixture[] = [
     expectIssueCount: 0,
     expectCategories: [],
   },
+  {
+    name: "quote-locate-wrong-offset",
+    fullText: "第一段说明。\n\n第二段里有需要改的表述，请处理。",
+    chunkText: "第二段里有需要改的表述，请处理。",
+    chunkOffset: "第一段说明。\n\n".length,
+    raw: {
+      summary: "第二段有表达可优化。",
+      issues: [
+        {
+          category: "style",
+          severity: "medium",
+          title: "表述优化",
+          quote: "需要改的表述",
+          message: "可更自然",
+          suggestion: "待优化的表述",
+          start: 900,
+          end: 910,
+        },
+      ],
+    },
+    expectIssueCount: 1,
+    expectCategories: ["style"],
+  },
 ];
 
 export const LIVE_FIXTURES: LiveCheckFixture[] = [

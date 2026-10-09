@@ -132,12 +132,12 @@ export function Workspace() {
     const total = splitTextIntoChunks(text).length;
     setCheckProgress({ current: 0, total });
     try {
-      const { check, meta, proposedText } = await runCheckWithProgress(
+      const { check, meta } = await runCheckWithProgress(
         text,
         checkDirection,
         setCheckProgress,
       );
-      const payload: AnalyzeResponse = { check, meta, proposedText };
+      const payload: AnalyzeResponse = { check, meta };
       setResult(payload);
       if (meta.degraded) {
         setError(meta.degraded);
@@ -150,7 +150,7 @@ export function Workspace() {
       }
       setIssueResolved({});
       setCheckBaselineText(text);
-      setViewChanges(Boolean(proposedText));
+      setViewChanges(false);
       setActiveIssueId(check.issues[0]?.id ?? null);
       setCheckHistory(
         appendCheckHistory({
