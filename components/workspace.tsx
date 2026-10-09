@@ -1,9 +1,18 @@
 "use client";
 
-import { AlertCircle, Copy, Download, FileDiff, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  Copy,
+  Download,
+  FileDiff,
+  PanelRightOpen,
+  Upload,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CheckPanel } from "@/components/check-panel";
+import { MarkdownPreview } from "@/components/markdown-preview";
+import { ResizeSplit } from "@/components/resize-split";
 import { TranslateMenu } from "@/components/translate-menu";
 import {
   DocumentEditor,
@@ -48,6 +57,7 @@ export function Workspace() {
   const editorRef = useRef<DocumentEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [documentName, setDocumentName] = useState("文稿.md");
+  const [mdPreviewOpen, setMdPreviewOpen] = useState(false);
 
   function resetAfterDocumentChange() {
     setResult(null);
@@ -220,9 +230,17 @@ export function Workspace() {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#f4f2ef] p-4 text-stone-900 lg:p-6">
-      <main className="mx-auto grid min-h-0 w-full max-w-7xl flex-1 grid-cols-1 grid-rows-1 gap-4 lg:grid-cols-[1fr_380px]">
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+    <div className="flex h-dvh flex-col overflow-hidden bg-stone-200/80 text-stone-900">
+      <main className="flex min-h-0 w-full flex-1 flex-col lg:flex-row">
+        <ResizeSplit
+          className="min-h-0 flex-1"
+          storageKey="split-main-sidebar"
+          initialRatio={0.68}
+          minFirstPx={360}
+          minSecondPx={300}
+          stackBelowLg
+          first={
+        <section className="flex h-full min-h-0 flex-col overflow-hidden bg-white lg:min-h-0">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-2.5">
             <div className="flex min-w-0 items-center gap-3">
               <span className="text-sm font-medium text-stone-600">正文</span>
@@ -292,27 +310,74 @@ export function Workspace() {
             </div>
           </div>
           <div className="relative flex min-h-0 flex-1 flex-col p-3">
-            <DocumentEditor
-              ref={editorRef}
-              text={text}
-              onChange={(value) => {
-                setText(value);
-                setActiveQuote(null);
-                if (!documentName.trim()) setDocumentName("文稿.md");
-              }}
-              placeholder="粘贴或输入任意中文写作文案…"
-              checkIssues={result?.check?.issues}
-              issueResolved={issueResolved}
-              showIssueUnderlines={showIssueUnderlines && !viewChanges}
-              viewChanges={viewChanges}
-              checkBaselineText={checkBaselineText}
-              pendingIssueCount={pendingCheckCount}
-              activeQuote={activeQuote}
-            />
+            {!mdPreviewOpen && (
+              <button
+                type="button"
+                onClick={() => setMdPreviewOpen(true)}
+                className="absolute top-5 right-5 z-20 inline-flex items-center gap-1.5 rounded-lg border border-stone-700/10 bg-stone-800 px-3 py-1.5 text-xs font-medium text-white shadow-md transition hover:bg-stone-700"
+              >
+                <PanelRightOpen className="h-3.5 w-3.5" />
+                打开 Markdown 预览
+              </button>
+            )}
+            {mdPreviewOpen ? (
+              <ResizeSplit
+                className="min-h-0 flex-1"
+                storageKey="split-editor-preview"
+                initialRatio={0.5}
+                minFirstPx={280}
+                minSecondPx={280}
+                stackBelowLg
+                first={
+                  <DocumentEditor
+                    ref={editorRef}
+                    text={text}
+                    onChange={(value) => {
+                      setText(value);
+                      setActiveQuote(null);
+                      if (!documentName.trim()) setDocumentName("文稿.md");
+                    }}
+                    placeholder="粘贴或输入任意中文写作文案…"
+                    checkIssues={result?.check?.issues}
+                    issueResolved={issueResolved}
+                    showIssueUnderlines={showIssueUnderlines && !viewChanges}
+                    viewChanges={viewChanges}
+                    checkBaselineText={checkBaselineText}
+                    pendingIssueCount={pendingCheckCount}
+                    activeQuote={activeQuote}
+                  />
+                }
+                second={
+                  <MarkdownPreview
+                    content={text}
+                    onClose={() => setMdPreviewOpen(false)}
+                  />
+                }
+              />
+            ) : (
+              <DocumentEditor
+                ref={editorRef}
+                text={text}
+                onChange={(value) => {
+                  setText(value);
+                  setActiveQuote(null);
+                  if (!documentName.trim()) setDocumentName("文稿.md");
+                }}
+                placeholder="粘贴或输入任意中文写作文案…"
+                checkIssues={result?.check?.issues}
+                issueResolved={issueResolved}
+                showIssueUnderlines={showIssueUnderlines && !viewChanges}
+                viewChanges={viewChanges}
+                checkBaselineText={checkBaselineText}
+                pendingIssueCount={pendingCheckCount}
+                activeQuote={activeQuote}
+              />
+            )}
           </div>
         </section>
-
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+          }
+          second={
+        <aside className="flex h-full min-h-0 flex-col overflow-hidden border-t border-stone-200 bg-white lg:border-t-0">
           {error && (
             <div className="mx-3 mt-3 flex shrink-0 gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -334,6 +399,8 @@ export function Workspace() {
             onDirectionChange={setCheckDirection}
           />
         </aside>
+          }
+        />
       </main>
     </div>
   );
