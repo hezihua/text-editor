@@ -33,6 +33,8 @@ const UNIVERSAL_ALIGNMENT_RULES = `
 - 不得用「原因/背景/技术细节」句替换「接下来/后续/安排/计划」类句子；口语化也应保留计划信息或整句改写为通顺的一句
 - suggestion 必须是应用后可独立读通的片段（注意 quote 若在段中，勿在 suggestion 末尾硬加句号导致与后文断裂）
 - 不确定 quote 是否对应你的说明时，不要输出该 issue（宁缺毋滥）
+- 禁止从词语中间截断 quote（例：不得只圈「同事好，写这」而把「封信」留给后文；应圈「各位同事好，写这封信」或至少到自然衔接处）
+- 写完后自检： mentally 用 suggestion 替换 quote，与前后各 10 字连读，若出现重复字、残片开头（如「封信」「是要」）则改写 quote/suggestion 或丢弃该条
 `;
 
 const GENERAL_RULES = `
@@ -44,9 +46,16 @@ const GENERAL_RULES = `
 - 全部使用简体中文
 `;
 
+const FORMAL_STYLE_RULES = `
+正式写作专用：
+- 口语改书面语时仍须保持句子完整；问候可改为「各位同事：」等，但 quote 须含完整开场至「写这封信/如下/现将」等衔接，suggestion 替换后不得留下「封信」「是要」等残片
+- 优先整句或分句改写，避免只改 2–4 个字导致前后拼接不通
+`;
+
 export function buildCheckPrompt(text: string, directionId: CheckDirectionId) {
   const direction = getCheckDirection(directionId);
   const isBasic = directionId === "basic";
+  const formalExtra = directionId === "formal" ? FORMAL_STYLE_RULES : "";
 
   return `${isBasic ? "" : WRITING_CONTEXT}
 
@@ -56,6 +65,7 @@ export function buildCheckPrompt(text: string, directionId: CheckDirectionId) {
 请在该方向下审查正文，重点：
 ${direction.promptFocus}
 ${isBasic ? BASIC_RULES : ""}
+${formalExtra}
 ${UNIVERSAL_ALIGNMENT_RULES}
 ${!isBasic ? `
 - 仍须标注真正的语法、标点错误（若存在）

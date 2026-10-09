@@ -176,6 +176,79 @@ function isContextRedundantCauseSwap(
   return false;
 }
 
+/** 模拟整段替换 quote 后的正文 */
+function textAfterReplace(fullText: string, issue: CheckIssue): string {
+  return (
+    fullText.slice(0, issue.start) +
+    issue.suggestion +
+    fullText.slice(issue.end)
+  );
+}
+
+/**
+ * quote 从短语中间截断，替换后会留下「封信」「是要」等残片，或造成「各位各位」重复。
+ */
+function isSeamBrokenAfterReplace(
+  fullText: string,
+  issue: CheckIssue,
+): boolean {
+  const q = issue.quote.trim();
+  const s = issue.suggestion.trim();
+  const afterOrig = fullText.slice(issue.end, issue.end + 8);
+
+  if (/写这?$/.test(q) && /^封信|^这封|^是要|^是想/.test(afterOrig)) {
+    return true;
+  }
+
+  if (/[：:]$/.test(s) && /^封信|^这封|^，写/.test(afterOrig)) {
+    return true;
+  }
+
+  const merged = textAfterReplace(fullText, issue);
+  const seamStart = Math.max(0, issue.start - 6);
+  const seamEnd = Math.min(
+    merged.length,
+    issue.start + s.length + 10,
+  );
+  const seam = merged.slice(seamStart, seamEnd);
+
+  if (/各位各位|同事同事|您好您好|：封信|：这封|好，写这/.test(seam)) {
+    return true;
+  }
+
+  const before = merged.slice(Math.max(0, issue.start - 8), issue.start);
+  for (let len = 2; len <= Math.min(8, s.length, before.length); len++) {
+    if (before.endsWith(s.slice(0, len))) return true;
+  }
+
+  const afterNew = merged.slice(
+    issue.start + s.length,
+    issue.start + s.length + 8,
+  );
+  if (
+    /[：:，,]$/.test(s) &&
+    /^[a-zA-Z0-9\u4e00-\u9fff]{1,4}[是信想]/.test(afterNew) &&
+    !/^[，、；]/.test(afterNew)
+  ) {
+    const joined = s.slice(-1) + afterNew.slice(0, 4);
+    if (/：封信|：这封|：是要/.test(joined)) return true;
+  }
+
+  return false;
+}
+
+/** 改问候/称呼类：title 说问候但 quote 未含完整问候结构 */
+function isGreetingQuoteTruncated(issue: CheckIssue): boolean {
+  const blob = `${issue.title}\n${issue.message}`;
+  if (!GREETING_TOPIC.test(blob)) return false;
+  const q = issue.quote.trim();
+  if (/写这?$/.test(q)) return true;
+  if (/同事好|您好|你好|大家好/.test(q) && !/[。！？；]$/.test(q) && q.length <= 12) {
+    return !/写这封信|如下|现将|谨此|此致/.test(q);
+  }
+  return false;
+}
+
 /** quote 在段中未结束，suggestion 却另起句号，容易与后文拼接不通 */
 function isBrokenBoundarySwap(fullText: string, issue: CheckIssue): boolean {
   const q = issue.quote.trim();
@@ -203,6 +276,8 @@ export function filterUnsafeIssues(
     if (isOversizedQuoteSpan(issue)) return false;
     if (isContextRedundantCauseSwap(fullText, issue)) return false;
     if (isBrokenBoundarySwap(fullText, issue)) return false;
+    if (isSeamBrokenAfterReplace(fullText, issue)) return false;
+    if (isGreetingQuoteTruncated(issue)) return false;
     return true;
   });
 }
@@ -214,4 +289,12 @@ export function applyIssueSanityFilter(
   const issues = filterUnsafeIssues(check.issues, fullText);
   if (issues.length === check.issues.length) return check;
   return { ...check, issues };
+}
+
+/** 应用前二次校验（与 filterUnsafeIssues 一致） */
+export function isIssueSemanticallySafe(
+  fullText: string,
+  issue: CheckIssue,
+): boolean {
+  return filterUnsafeIssues([issue], fullText).length === 1;
 }

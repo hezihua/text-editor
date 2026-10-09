@@ -94,6 +94,27 @@ function runOffline() {
   assert(redundantCause.length === 0, "应过滤计划句被重复原因句替换");
   console.log("  ✓ redundant-cause swap");
 
+  const greetDoc =
+    "各位同事好，写这封信是想同步一下项目进展。";
+  const truncatedGreet = filterUnsafeIssues(
+    [
+      {
+        id: "g",
+        category: "style",
+        severity: "medium",
+        title: "问候语过于口语化",
+        quote: "同事好，写这",
+        message: "改为更正式问候",
+        suggestion: "各位同事：",
+        start: greetDoc.indexOf("同事好"),
+        end: greetDoc.indexOf("同事好") + "同事好，写这".length,
+      },
+    ],
+    greetDoc,
+  );
+  assert(truncatedGreet.length === 0, "应过滤截断问候导致「封信」残片的建议");
+  console.log("  ✓ greeting seam");
+
   console.log("— 离线：归一化样例 —");
   for (const fx of OFFLINE_FIXTURES) {
     const result = normalizeChunkCheck(

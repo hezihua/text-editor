@@ -38,6 +38,7 @@ import {
   loadCheckHistory,
   type CheckHistoryEntry,
 } from "@/lib/check-history";
+import { isIssueSemanticallySafe } from "@/lib/issue-sanity";
 import { findIssueRange } from "@/lib/issue-range";
 import type { AnalyzeResponse, CheckIssue } from "@/lib/schemas";
 import type { TranslateTarget } from "@/lib/translate";
@@ -222,7 +223,19 @@ export function Workspace() {
       quote: string,
       suggestion: string,
       span?: { start: number; end: number },
+      issueForSafety?: CheckIssue,
     ) => {
+      if (issueForSafety) {
+        const range = span
+          ? { ...issueForSafety, start: span.start, end: span.end }
+          : issueForSafety;
+        if (!isIssueSemanticallySafe(text, range)) {
+          setError(
+            "该建议替换后与前后文不通顺（如截断「写这封信」），请忽略或重新检查本条。",
+          );
+          return;
+        }
+      }
       const { next, ok } = applyReplacement(text, quote, suggestion, span);
       if (!ok) {
         setError("无法在正文中定位该片段，可能已被修改。请重新检查。");
@@ -244,7 +257,9 @@ export function Workspace() {
     const issues = result?.check?.issues;
     if (!issues) return;
 
-    const pending = issues.filter((i) => !issueResolved[i.id]);
+    const pending = issues.filter(
+      (i) => !issueResolved[i.id] && isIssueSemanticallySafe(text, i),
+    );
     if (pending.length === 0) return;
 
     const { next, appliedIds, failedIds } = applyAllReplacements(
@@ -333,6 +348,7 @@ export function Workspace() {
           activeIssue.quote,
           activeIssue.suggestion,
           { start: activeIssue.start, end: activeIssue.end },
+          activeIssue,
         );
         selectRelativeIssue(1);
         return;

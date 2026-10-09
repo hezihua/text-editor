@@ -34,6 +34,7 @@ type CheckPanelProps = {
     quote: string,
     suggestion: string,
     span: { start: number; end: number },
+    issue: CheckIssue,
   ) => void;
   onApplyAll: () => void;
   onIgnore: (issueId: string) => void;
@@ -238,10 +239,13 @@ export function CheckPanel({
                   <button
                     type="button"
                     onClick={() =>
-                      onApply(issue.id, issue.quote, issue.suggestion, {
-                        start: issue.start,
-                        end: issue.end,
-                      })
+                      onApply(
+                        issue.id,
+                        issue.quote,
+                        issue.suggestion,
+                        { start: issue.start, end: issue.end },
+                        issue,
+                      )
                     }
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
                   >
