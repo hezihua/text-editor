@@ -1,0 +1,116 @@
+{
+  "slug": "silu",
+  "containerName": "思录 · 学习与思考",
+  "source": "https://github.com/hezihua/silu",
+  "version": 1,
+  "articles": [
+    {
+      "id": "silu:content/posts/2026-06-11-ask-and-copy",
+      "path": "posts/2026-06-11-ask-and-copy.md",
+      "title": "01 · 你赚不到钱是因为，不会问又不会抄",
+      "sortOrder": 0,
+      "groupKey": "silu-2026-06",
+      "groupLabel": "2026 年 6 月",
+      "groupSortOrder": 202606
+    },
+    {
+      "id": "silu:content/posts/2026-06-11-earning-info-gap",
+      "path": "posts/2026-06-11-earning-info-gap.md",
+      "title": "02 · 赚钱信息差不会出现在网上",
+      "sortOrder": 1,
+      "groupKey": "silu-2026-06",
+      "groupLabel": "2026 年 6 月",
+      "groupSortOrder": 202606
+    },
+    {
+      "id": "silu:content/posts/2026-06-11-game-theory-money",
+      "path": "posts/2026-06-11-game-theory-money.md",
+      "title": "03 · 真正有用的搞钱思维是博弈思维",
+      "sortOrder": 2,
+      "groupKey": "silu-2026-06",
+      "groupLabel": "2026 年 6 月",
+      "groupSortOrder": 202606
+    },
+    {
+      "id": "silu:content/posts/2026-08-16-duanpingyong-popmart-investment-toolkit",
+      "path": "posts/2026-08-16-duanpingyong-popmart-investment-toolkit.md",
+      "title": "01 · 拆解段永平对泡泡玛特的投资：除了押对涨跌，你还需要一整套工具箱",
+      "sortOrder": 3,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-16-financial-thinking-dialogue",
+      "path": "posts/2026-08-16-financial-thinking-dialogue.md",
+      "title": "02 · 金融思维：从小白到认知升级（与 Gemini 的对话）",
+      "sortOrder": 4,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-16-human-as-system",
+      "path": "posts/2026-08-16-human-as-system.md",
+      "title": "03 · 人作为一个系统：能量、认知与熵减",
+      "sortOrder": 5,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-16-investment-what-is-it",
+      "path": "posts/2026-08-16-investment-what-is-it.md",
+      "title": "04 · 他押对了 AI 趋势，却还是爆仓了——投资究竟是什么",
+      "sortOrder": 6,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-16-wealth-four-forces",
+      "path": "posts/2026-08-16-wealth-four-forces.md",
+      "title": "05 · 挣钱的四重乘法：能力、系统、信任与时间复利",
+      "sortOrder": 7,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-19-compute-dollar",
+      "path": "posts/2026-08-19-compute-dollar.md",
+      "title": "06 · 算力美元：当 GPU 被押给华尔街之后，美元如何重新锚定 AI 时代",
+      "sortOrder": 8,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-20-bullwhip-effect-finance",
+      "path": "posts/2026-08-20-bullwhip-effect-finance.md",
+      "title": "07 · 金融市场的长鞭效应：为什么散户总在最高点接盘、最低点割肉",
+      "sortOrder": 9,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-20-xiaolai-english-self-talk",
+      "path": "posts/2026-08-20-xiaolai-english-self-talk.md",
+      "title": "08 · 1000 小时与自我暗示：李笑来如何用朗读“劫持”潜意识、切换英语思维",
+      "sortOrder": 10,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    },
+    {
+      "id": "silu:content/posts/2026-08-22-expectation-gap",
+      "path": "posts/2026-08-22-expectation-gap.md",
+      "title": "09 · 预期差：决定全球金融行情的操作与信号",
+      "sortOrder": 11,
+      "groupKey": "silu-2026-08",
+      "groupLabel": "2026 年 8 月",
+      "groupSortOrder": 202608
+    }
+  ]
+}

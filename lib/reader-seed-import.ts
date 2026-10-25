@@ -5,6 +5,7 @@ import {
   type ReaderContainer,
   type ReaderLibrary,
 } from "@/lib/reader-library";
+import type { ReaderContentManifest } from "@/lib/reader-content-manifest";
 
 const IMPORTED_SEEDS_KEY = "text-editor-reader-imported-seeds";
 
@@ -90,6 +91,59 @@ export function mergeSeedBundle(
   return next;
 }
 
+/** 从 manifest + 各 .md 文件导入（frontmatter + 正文，非巨型 JSON） */
+export async function ensureReaderCollectionFromContent(
+  slug: string,
+  basePath: string,
+): Promise<ReaderLibrary | null> {
+  if (typeof window === "undefined") return null;
+
+  const lib = loadReaderLibrary();
+  const containerId = containerIdForSeed(slug);
+  if (lib.containers.some((c) => c.id === containerId)) {
+    if (!getImportedSeedSlugs().includes(slug)) markSeedImported(slug);
+    return null;
+  }
+
+  const manifestRes = await fetch(`${basePath}/manifest.json`);
+  if (!manifestRes.ok) {
+    console.warn(`阅读器文集 ${slug} manifest 加载失败: ${manifestRes.status}`);
+    return null;
+  }
+  const manifest = (await manifestRes.json()) as ReaderContentManifest;
+  if (manifest.slug !== slug || !manifest.articles?.length) {
+    console.warn(`阅读器文集 ${slug} manifest 无效`);
+    return null;
+  }
+
+  const articlesWithMd = await Promise.all(
+    manifest.articles.map(async (meta) => {
+      const mdRes = await fetch(`${basePath}/${meta.path}`);
+      if (!mdRes.ok) {
+        throw new Error(`无法加载 ${meta.path}`);
+      }
+      const content = await mdRes.text();
+      return {
+        id: meta.id,
+        title: meta.title,
+        content,
+        sortOrder: meta.sortOrder,
+        groupKey: meta.groupKey,
+        groupLabel: meta.groupLabel,
+        groupSortOrder: meta.groupSortOrder,
+      } satisfies ReaderSeedArticle;
+    }),
+  );
+
+  return mergeSeedBundle(lib, {
+    slug: manifest.slug,
+    containerName: manifest.containerName,
+    source: manifest.source,
+    articles: articlesWithMd,
+  });
+}
+
+/** @deprecated 旧版单文件 JSON 种子 */
 export async function ensureReaderSeedFromUrl(
   slug: string,
   url: string,
@@ -117,29 +171,29 @@ export async function ensureReaderSeedFromUrl(
 }
 
 export async function ensureAwesomeFdeReaderSeed(): Promise<ReaderLibrary | null> {
-  return ensureReaderSeedFromUrl(
+  return ensureReaderCollectionFromContent(
     "awesome-fde",
-    "/reader-seeds/awesome-fde.json",
+    "/reader-content/awesome-fde",
   );
 }
 
 export async function ensureAiTutorialReaderSeed(): Promise<ReaderLibrary | null> {
-  return ensureReaderSeedFromUrl(
+  return ensureReaderCollectionFromContent(
     "ai-tutorial",
-    "/reader-seeds/ai-tutorial.json",
+    "/reader-content/ai-tutorial",
   );
 }
 
 export async function ensureSiluReaderSeed(): Promise<ReaderLibrary | null> {
-  return ensureReaderSeedFromUrl("silu", "/reader-seeds/silu.json");
+  return ensureReaderCollectionFromContent("silu", "/reader-content/silu");
 }
 
 export async function ensureLeetcodeJournalReaderSeed(): Promise<
   ReaderLibrary | null
 > {
-  return ensureReaderSeedFromUrl(
+  return ensureReaderCollectionFromContent(
     "leetcode-journal",
-    "/reader-seeds/leetcode-journal.json",
+    "/reader-content/leetcode-journal",
   );
 }
 

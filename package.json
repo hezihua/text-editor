@@ -14,11 +14,8 @@
     "lint": "eslint",
     "env:sync": "bash scripts/sync-vercel-env.sh",
     "check:regression": "tsx scripts/check-regression.ts",
-    "reader:seed-awesome-fde": "tsx scripts/build-awesome-fde-reader-seed.ts",
-    "reader:seed-ai-tutorial": "tsx scripts/build-ai-tutorial-reader-seed.ts",
-    "reader:seed-silu": "tsx scripts/build-silu-reader-seed.ts",
-    "reader:seed-leetcode-journal": "tsx scripts/build-leetcode-journal-reader-seed.ts",
-    "reader:seed-all": "pnpm run reader:seed-awesome-fde && pnpm run reader:seed-ai-tutorial && pnpm run reader:seed-silu && pnpm run reader:seed-leetcode-journal"
+    "reader:sync": "tsx scripts/sync-reader-collections.ts",
+    "reader:seed-all": "pnpm run reader:sync"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",

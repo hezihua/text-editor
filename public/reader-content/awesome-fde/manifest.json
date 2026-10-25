@@ -1,0 +1,197 @@
+{
+  "slug": "awesome-fde",
+  "containerName": "Awesome FDE · 实战训练营笔记",
+  "source": "https://github.com/hezihua/awesome-fde",
+  "version": 1,
+  "articles": [
+    {
+      "id": "awesome-fde:content/basics/fundamentals/01-opening-and-market",
+      "path": "basics/fundamentals/01-opening-and-market.md",
+      "title": "01 · 开营与市场全景",
+      "sortOrder": 0,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/basics/fundamentals/02-model-and-product",
+      "path": "basics/fundamentals/02-model-and-product.md",
+      "title": "02 · 模型与产品选型",
+      "sortOrder": 1,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/basics/fundamentals/03-data-governance",
+      "path": "basics/fundamentals/03-data-governance.md",
+      "title": "03 · 数据治理与知识库",
+      "sortOrder": 2,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/basics/fundamentals/04-organization-process",
+      "path": "basics/fundamentals/04-organization-process.md",
+      "title": "04 · 组织、流程与拍板人",
+      "sortOrder": 3,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/basics/fundamentals/05-business-model",
+      "path": "basics/fundamentals/05-business-model.md",
+      "title": "05 · 商业模式拆解",
+      "sortOrder": 4,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/basics/fundamentals/06-legal-compliance",
+      "path": "basics/fundamentals/06-legal-compliance.md",
+      "title": "06 · 法律合规底线",
+      "sortOrder": 5,
+      "groupKey": "basics",
+      "groupLabel": "基础课",
+      "groupSortOrder": 1
+    },
+    {
+      "id": "awesome-fde:content/technical/practice/07-tech-terms",
+      "path": "technical/practice/07-tech-terms.md",
+      "title": "07 · 技术名词解析",
+      "sortOrder": 6,
+      "groupKey": "technical",
+      "groupLabel": "技术课",
+      "groupSortOrder": 2
+    },
+    {
+      "id": "awesome-fde:content/technical/practice/08-knowledge-base-101",
+      "path": "technical/practice/08-knowledge-base-101.md",
+      "title": "08 · 知识库从 0 到 1",
+      "sortOrder": 7,
+      "groupKey": "technical",
+      "groupLabel": "技术课",
+      "groupSortOrder": 2
+    },
+    {
+      "id": "awesome-fde:content/technical/practice/09-rag-practice",
+      "path": "technical/practice/09-rag-practice.md",
+      "title": "09 · RAG 原理与导游知识库",
+      "sortOrder": 8,
+      "groupKey": "technical",
+      "groupLabel": "技术课",
+      "groupSortOrder": 2
+    },
+    {
+      "id": "awesome-fde:content/technical/practice/10-workflow",
+      "path": "technical/practice/10-workflow.md",
+      "title": "10 · 工作流实战",
+      "sortOrder": 9,
+      "groupKey": "technical",
+      "groupLabel": "技术课",
+      "groupSortOrder": 2
+    },
+    {
+      "id": "awesome-fde:content/technical/practice/11-agent-delivery",
+      "path": "technical/practice/11-agent-delivery.md",
+      "title": "11 · Agent 部署与 AKA 交付",
+      "sortOrder": 10,
+      "groupKey": "technical",
+      "groupLabel": "技术课",
+      "groupSortOrder": 2
+    },
+    {
+      "id": "awesome-fde:content/cases/delivery/12-xiaohongshu-case",
+      "path": "cases/delivery/12-xiaohongshu-case.md",
+      "title": "12 · 千元档：小红书内容工厂",
+      "sortOrder": 11,
+      "groupKey": "cases",
+      "groupLabel": "实战案例",
+      "groupSortOrder": 3
+    },
+    {
+      "id": "awesome-fde:content/cases/delivery/13-wan-yuan-case",
+      "path": "cases/delivery/13-wan-yuan-case.md",
+      "title": "13 · 万元档：客户档案与知识库",
+      "sortOrder": 12,
+      "groupKey": "cases",
+      "groupLabel": "实战案例",
+      "groupSortOrder": 3
+    },
+    {
+      "id": "awesome-fde:content/cases/delivery/14-shi-wan-case",
+      "path": "cases/delivery/14-shi-wan-case.md",
+      "title": "14 · 十万档：大客户培训与定制",
+      "sortOrder": 13,
+      "groupKey": "cases",
+      "groupLabel": "实战案例",
+      "groupSortOrder": 3
+    },
+    {
+      "id": "awesome-fde:content/cases/delivery/15-presales-and-crm",
+      "path": "cases/delivery/15-presales-and-crm.md",
+      "title": "15 · 售前、合同与客户管理",
+      "sortOrder": 14,
+      "groupKey": "cases",
+      "groupLabel": "实战案例",
+      "groupSortOrder": 3
+    },
+    {
+      "id": "awesome-fde:content/q&a/00-qa-original",
+      "path": "q&a/00-qa-original.md",
+      "title": "00 · Q&A 原篇：一次 FDE 项目理解问答",
+      "sortOrder": 15,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    },
+    {
+      "id": "awesome-fde:content/q&a/01-business-and-organization",
+      "path": "q&a/01-business-and-organization.md",
+      "title": "01 · 业务与组织：FDE 先解决什么",
+      "sortOrder": 16,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    },
+    {
+      "id": "awesome-fde:content/q&a/02-discovery-and-delivery",
+      "path": "q&a/02-discovery-and-delivery.md",
+      "title": "02 · 需求诊断与项目交付：从问题到可验收试点",
+      "sortOrder": 17,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    },
+    {
+      "id": "awesome-fde:content/q&a/03-knowledge-and-data",
+      "path": "q&a/03-knowledge-and-data.md",
+      "title": "03 · 知识库与数据治理：让 AI 有可信依据",
+      "sortOrder": 18,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    },
+    {
+      "id": "awesome-fde:content/q&a/04-agents-and-automation",
+      "path": "q&a/04-agents-and-automation.md",
+      "title": "04 · Agent 与自动化：把流程做稳而不是做炫",
+      "sortOrder": 19,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    },
+    {
+      "id": "awesome-fde:content/q&a/05-pilot-and-operations",
+      "path": "q&a/05-pilot-and-operations.md",
+      "title": "05 · 试点、验收与运维：从能跑到可持续",
+      "sortOrder": 20,
+      "groupKey": "qa",
+      "groupLabel": "Q&A",
+      "groupSortOrder": 4
+    }
+  ]
+}

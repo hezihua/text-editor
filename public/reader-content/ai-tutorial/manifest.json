@@ -1,0 +1,323 @@
+{
+  "slug": "ai-tutorial",
+  "containerName": "AI Tutorial · 机器学习与工程化笔记",
+  "source": "https://github.com/hezihua/ai-tutorial",
+  "version": 1,
+  "articles": [
+    {
+      "id": "ai-tutorial:content/notes/01-ai-concepts",
+      "path": "notes/01-ai-concepts.md",
+      "title": "01 · AI 概念全解析",
+      "sortOrder": 0,
+      "groupKey": "notes",
+      "groupLabel": "导览",
+      "groupSortOrder": 0
+    },
+    {
+      "id": "ai-tutorial:content/notes/02-learning-path",
+      "path": "notes/02-learning-path.md",
+      "title": "02 · AI 学习路径：从零到 Agent 工程师",
+      "sortOrder": 1,
+      "groupKey": "notes",
+      "groupLabel": "导览",
+      "groupSortOrder": 0
+    },
+    {
+      "id": "ai-tutorial:content/notes/03-ai-history",
+      "path": "notes/03-ai-history.md",
+      "title": "03 · AI 发展史：从图灵测试到通用智能的 80 年",
+      "sortOrder": 2,
+      "groupKey": "notes",
+      "groupLabel": "导览",
+      "groupSortOrder": 0
+    },
+    {
+      "id": "ai-tutorial:content/ml/machine-learning/01-introduction",
+      "path": "ml/machine-learning/01-introduction.md",
+      "title": "01 · 机器学习介绍",
+      "sortOrder": 3,
+      "groupKey": "ml-machine-learning",
+      "groupLabel": "机器学习 · 机器学习",
+      "groupSortOrder": 10
+    },
+    {
+      "id": "ai-tutorial:content/ml/machine-learning/02-linear-regression",
+      "path": "ml/machine-learning/02-linear-regression.md",
+      "title": "02 · 线性回归",
+      "sortOrder": 4,
+      "groupKey": "ml-machine-learning",
+      "groupLabel": "机器学习 · 机器学习",
+      "groupSortOrder": 10
+    },
+    {
+      "id": "ai-tutorial:content/ml/machine-learning/03-classification",
+      "path": "ml/machine-learning/03-classification.md",
+      "title": "03 · 分类问题",
+      "sortOrder": 5,
+      "groupKey": "ml-machine-learning",
+      "groupLabel": "机器学习 · 机器学习",
+      "groupSortOrder": 10
+    },
+    {
+      "id": "ai-tutorial:content/ml/machine-learning/05-neural-network",
+      "path": "ml/machine-learning/05-neural-network.md",
+      "title": "04 · 神经网络基础",
+      "sortOrder": 6,
+      "groupKey": "ml-machine-learning",
+      "groupLabel": "机器学习 · 机器学习",
+      "groupSortOrder": 10
+    },
+    {
+      "id": "ai-tutorial:content/ml/reinforcement-learning/01-q-learning",
+      "path": "ml/reinforcement-learning/01-q-learning.md",
+      "title": "01 · 强化学习基础",
+      "sortOrder": 7,
+      "groupKey": "ml-reinforcement-learning",
+      "groupLabel": "机器学习 · 强化学习",
+      "groupSortOrder": 11
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/01-transformer",
+      "path": "ml/generative-ai/01-transformer.md",
+      "title": "01 · Transformer 架构详解",
+      "sortOrder": 8,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture1",
+      "path": "ml/generative-ai/lihongyi_genai_lecture1.md",
+      "title": "02 · 🔥 一堂课搞懂生成式AI原理：从\"文字接龙\"到亲手跑通 Llama 3.2",
+      "sortOrder": 9,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture10",
+      "path": "ml/generative-ai/lihongyi_genai_lecture10.md",
+      "title": "03 · 💼 AI Agent（3/3）：對工作帶來的衝擊——以學術研究為例",
+      "sortOrder": 10,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture11",
+      "path": "ml/generative-ai/lihongyi_genai_lecture11.md",
+      "title": "04 · ⚡ 加快語言模型生成速度（1/2）：Flash Attention",
+      "sortOrder": 11,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture12",
+      "path": "ml/generative-ai/lihongyi_genai_lecture12.md",
+      "title": "05 · 🗄️ 加快語言模型生成速度（2/2）：KV Cache",
+      "sortOrder": 12,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture13",
+      "path": "ml/generative-ai/lihongyi_genai_lecture13.md",
+      "title": "06 · 🪢 Harness Engineering：模型不是不夠聰明，只是沒有好好引導",
+      "sortOrder": 13,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture2",
+      "path": "ml/generative-ai/lihongyi_genai_lecture2.md",
+      "title": "07 · 🚀 别再只盯着 Prompt 了！2025 年 AI 开发的核心是「上下文工程」",
+      "sortOrder": 14,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture3",
+      "path": "ml/generative-ai/lihongyi_genai_lecture3.md",
+      "title": "08 · 🧠 深入解剖大型语言模型：从输入到输出的完整旅程",
+      "sortOrder": 15,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture4",
+      "path": "ml/generative-ai/lihongyi_genai_lecture4.md",
+      "title": "09 · 🚨 評估生成式 AI 能力時可能遇到的各種坑",
+      "sortOrder": 16,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture5",
+      "path": "ml/generative-ai/lihongyi_genai_lecture5.md",
+      "title": "10 · 🧬 大型語言模型的學習歷程：預訓練、SFT 與 RLHF",
+      "sortOrder": 17,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture6",
+      "path": "ml/generative-ai/lihongyi_genai_lecture6.md",
+      "title": "11 · 🔄 通用模型的終身學習：Fine-tuning、Model Editing、Merging 與 Test-Time Training",
+      "sortOrder": 18,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture7",
+      "path": "ml/generative-ai/lihongyi_genai_lecture7.md",
+      "title": "12 · 🦞 解剖小龍蝦：以 OpenClaw 為例介紹 AI Agent 的運作原理",
+      "sortOrder": 19,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture8",
+      "path": "ml/generative-ai/lihongyi_genai_lecture8.md",
+      "title": "13 · 🧠 AI Agent（1/3）：Context Engineering 基本概念",
+      "sortOrder": 20,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/lihongyi_genai_lecture9",
+      "path": "ml/generative-ai/lihongyi_genai_lecture9.md",
+      "title": "14 · 🤝 AI Agent（2/3）：Agent 之間可以有什麼樣的互動",
+      "sortOrder": 21,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/ml/generative-ai/sft",
+      "path": "ml/generative-ai/sft.md",
+      "title": "15 · 🔬 SFT（Supervised Fine-Tuning）总结",
+      "sortOrder": 22,
+      "groupKey": "ml-generative-ai",
+      "groupLabel": "机器学习 · 生成式 AI",
+      "groupSortOrder": 12
+    },
+    {
+      "id": "ai-tutorial:content/engineering/mlops-basics/01-introduction",
+      "path": "engineering/mlops-basics/01-introduction.md",
+      "title": "01 · MLOps 导论",
+      "sortOrder": 23,
+      "groupKey": "eng-mlops",
+      "groupLabel": "AI 工程化 · MLOps",
+      "groupSortOrder": 20
+    },
+    {
+      "id": "ai-tutorial:content/engineering/mlops-basics/02-data-versioning",
+      "path": "engineering/mlops-basics/02-data-versioning.md",
+      "title": "02 · 数据版本管理",
+      "sortOrder": 24,
+      "groupKey": "eng-mlops",
+      "groupLabel": "AI 工程化 · MLOps",
+      "groupSortOrder": 20
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/01-rag-introduction",
+      "path": "engineering/llm-engineering/01-rag-introduction.md",
+      "title": "01 · RAG 检索增强生成",
+      "sortOrder": 25,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/02-agent-architecture",
+      "path": "engineering/llm-engineering/02-agent-architecture.md",
+      "title": "02 · Agent 架构设计",
+      "sortOrder": 26,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/03-langchain-context-management",
+      "path": "engineering/llm-engineering/03-langchain-context-management.md",
+      "title": "03 · LangChain 上下文管理实战",
+      "sortOrder": 27,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/04-business-ai-architecture",
+      "path": "engineering/llm-engineering/04-business-ai-architecture.md",
+      "title": "04 · 业务与 AI 协作架构图汇总",
+      "sortOrder": 28,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/05-infini-ontology-aip",
+      "path": "engineering/llm-engineering/05-infini-ontology-aip.md",
+      "title": "05 · Infini Ontology：AIP 闭环要点总结",
+      "sortOrder": 29,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/llm-engineering/06-vibe-coding-to-ai-engineering",
+      "path": "engineering/llm-engineering/06-vibe-coding-to-ai-engineering.md",
+      "title": "06 · 从 Vibe Coding 到 AI 工程：最重要的四大能力",
+      "sortOrder": 30,
+      "groupKey": "eng-llm",
+      "groupLabel": "AI 工程化 · LLM 工程",
+      "groupSortOrder": 21
+    },
+    {
+      "id": "ai-tutorial:content/engineering/ai-infra/01-inference-optimization",
+      "path": "engineering/ai-infra/01-inference-optimization.md",
+      "title": "01 · 大模型推理优化",
+      "sortOrder": 31,
+      "groupKey": "eng-infra",
+      "groupLabel": "AI 工程化 · 基础设施",
+      "groupSortOrder": 22
+    },
+    {
+      "id": "ai-tutorial:content/engineering/ai-infra/02-gpu-scheduling",
+      "path": "engineering/ai-infra/02-gpu-scheduling.md",
+      "title": "02 · GPU 调度与资源管理",
+      "sortOrder": 32,
+      "groupKey": "eng-infra",
+      "groupLabel": "AI 工程化 · 基础设施",
+      "groupSortOrder": 22
+    },
+    {
+      "id": "ai-tutorial:content/engineering/quality-assurance/01-llm-evaluation",
+      "path": "engineering/quality-assurance/01-llm-evaluation.md",
+      "title": "01 · LLM 评测体系",
+      "sortOrder": 33,
+      "groupKey": "eng-quality",
+      "groupLabel": "AI 工程化 · 质量保障",
+      "groupSortOrder": 23
+    },
+    {
+      "id": "ai-tutorial:content/engineering/quality-assurance/02-safety-alignment",
+      "path": "engineering/quality-assurance/02-safety-alignment.md",
+      "title": "02 · LLM 安全对齐",
+      "sortOrder": 34,
+      "groupKey": "eng-quality",
+      "groupLabel": "AI 工程化 · 质量保障",
+      "groupSortOrder": 23
+    }
+  ]
+}
