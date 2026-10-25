@@ -15,6 +15,7 @@ export type ReaderSeedArticle = {
   sortOrder: number;
   groupKey?: string;
   groupLabel?: string;
+  groupSortOrder?: number;
 };
 
 export type ReaderSeedBundle = {
@@ -77,6 +78,7 @@ export function mergeSeedBundle(
     updatedAt: now + (seed.articles.length - a.sortOrder),
     groupKey: a.groupKey,
     groupLabel: a.groupLabel,
+    groupSortOrder: a.groupSortOrder,
   }));
 
   const next: ReaderLibrary = {
@@ -128,11 +130,29 @@ export async function ensureAiTutorialReaderSeed(): Promise<ReaderLibrary | null
   );
 }
 
+export async function ensureSiluReaderSeed(): Promise<ReaderLibrary | null> {
+  return ensureReaderSeedFromUrl("silu", "/reader-seeds/silu.json");
+}
+
+export async function ensureLeetcodeJournalReaderSeed(): Promise<
+  ReaderLibrary | null
+> {
+  return ensureReaderSeedFromUrl(
+    "leetcode-journal",
+    "/reader-seeds/leetcode-journal.json",
+  );
+}
+
 /** 导入内置课程文集（首次访问时写入 localStorage） */
 export async function ensureBuiltinReaderSeeds(): Promise<ReaderLibrary | null> {
   let lib = loadReaderLibrary();
   let changed = false;
-  for (const run of [ensureAwesomeFdeReaderSeed, ensureAiTutorialReaderSeed]) {
+  for (const run of [
+    ensureAwesomeFdeReaderSeed,
+    ensureAiTutorialReaderSeed,
+    ensureSiluReaderSeed,
+    ensureLeetcodeJournalReaderSeed,
+  ]) {
     const next = await run();
     if (next) {
       lib = next;

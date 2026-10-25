@@ -16,6 +16,8 @@ export type ReaderArticle = {
   /** 侧栏分组（入库时可写入；缺省则按 id/标题推断） */
   groupKey?: string;
   groupLabel?: string;
+  /** 分组排序（如 202608 表示 2026 年 8 月） */
+  groupSortOrder?: number;
 };
 
 export type ReaderLibrary = {

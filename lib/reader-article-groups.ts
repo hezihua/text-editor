@@ -44,6 +44,13 @@ const KNOWN_GROUPS: Record<string, ArticleGroupMeta> = {
     label: "AI 工程化 · 质量保障",
     order: 23,
   },
+  "lc-theory": { key: "lc-theory", label: "算法理论", order: 1 },
+  "lc-patterns": { key: "lc-patterns", label: "常用算法", order: 2 },
+  "lc-array": { key: "lc-array", label: "数组", order: 3 },
+  "lc-string": { key: "lc-string", label: "字符串", order: 4 },
+  "lc-linked-list": { key: "lc-linked-list", label: "链表", order: 5 },
+  "lc-stack": { key: "lc-stack", label: "栈", order: 6 },
+  "lc-tree": { key: "lc-tree", label: "二叉树", order: 7 },
   misc: { key: "misc", label: "文稿", order: 99 },
 };
 
@@ -92,7 +99,7 @@ function groupMetaFor(article: ReaderArticle): ArticleGroupMeta {
     return {
       key: article.groupKey,
       label: article.groupLabel,
-      order: known?.order ?? 50,
+      order: article.groupSortOrder ?? known?.order ?? 50,
     };
   }
   const key = inferGroupKey(article);
