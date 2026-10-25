@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderPlus, Trash2 } from "lucide-react";
+import { ArrowLeft, FolderPlus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -69,8 +69,16 @@ export function ReaderLibraryPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[var(--background)]">
-      <header className="shrink-0 border-b border-stone-200 bg-white px-4 py-4">
+      <header className="grid shrink-0 grid-cols-3 items-center border-b border-stone-200 bg-white px-4 py-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-xs text-stone-500 hover:text-stone-800"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          首页
+        </Link>
         <h1 className="text-center text-sm font-semibold text-stone-800">文集</h1>
+        <span aria-hidden />
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
@@ -131,7 +139,7 @@ export function ReaderLibraryPage() {
         </div>
 
         <p className="mt-4 text-center text-xs leading-relaxed text-stone-400">
-          点击文集进入阅读；在编辑器中改稿后可「保存到阅读器」。
+          点击文集进入阅读。
         </p>
       </main>
     </div>

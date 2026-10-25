@@ -126,7 +126,7 @@ export function ReaderArticleList({
   if (articles.length === 0) {
     return (
       <p className="text-xs leading-relaxed text-stone-400">
-        此文集暂无文章。在编辑器中改好后点「保存到阅读器」。
+        此文集暂无文章。
       </p>
     );
   }

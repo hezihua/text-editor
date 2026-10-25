@@ -2,12 +2,14 @@
 
 import {
   AlertCircle,
+  ArrowLeft,
   Copy,
   Download,
   FileDiff,
   PanelRightOpen,
   Upload,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CheckPanel } from "@/components/check-panel";
@@ -432,6 +434,14 @@ export function Workspace() {
         <section className="flex h-full min-h-0 flex-col overflow-hidden bg-white lg:min-h-0">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-2.5">
             <div className="flex min-w-0 items-center gap-3">
+              <Link
+                href="/"
+                className="inline-flex shrink-0 items-center gap-1 text-xs text-stone-500 hover:text-stone-800"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                首页
+              </Link>
+              <span className="h-4 w-px shrink-0 bg-stone-200" aria-hidden />
               <span className="text-sm font-medium text-stone-600">正文</span>
               <span
                 className="max-w-[140px] truncate text-xs text-stone-400 sm:max-w-[200px]"
