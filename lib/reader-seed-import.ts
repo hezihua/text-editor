@@ -120,3 +120,24 @@ export async function ensureAwesomeFdeReaderSeed(): Promise<ReaderLibrary | null
     "/reader-seeds/awesome-fde.json",
   );
 }
+
+export async function ensureAiTutorialReaderSeed(): Promise<ReaderLibrary | null> {
+  return ensureReaderSeedFromUrl(
+    "ai-tutorial",
+    "/reader-seeds/ai-tutorial.json",
+  );
+}
+
+/** 导入内置课程文集（首次访问时写入 localStorage） */
+export async function ensureBuiltinReaderSeeds(): Promise<ReaderLibrary | null> {
+  let lib = loadReaderLibrary();
+  let changed = false;
+  for (const run of [ensureAwesomeFdeReaderSeed, ensureAiTutorialReaderSeed]) {
+    const next = await run();
+    if (next) {
+      lib = next;
+      changed = true;
+    }
+  }
+  return changed ? lib : null;
+}

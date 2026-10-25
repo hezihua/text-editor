@@ -11,7 +11,7 @@ import {
   loadReaderLibrary,
   type ReaderLibrary,
 } from "@/lib/reader-library";
-import { ensureAwesomeFdeReaderSeed } from "@/lib/reader-seed-import";
+import { ensureBuiltinReaderSeeds } from "@/lib/reader-seed-import";
 
 export function ReaderLibraryPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export function ReaderLibraryPage() {
 
   useEffect(() => {
     let cancelled = false;
-    void ensureAwesomeFdeReaderSeed().then((next) => {
+    void ensureBuiltinReaderSeeds().then((next) => {
       if (!cancelled && next) setLibrary(next);
     });
     return () => {

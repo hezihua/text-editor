@@ -15,7 +15,7 @@ import {
   loadReaderLibrary,
   type ReaderLibrary,
 } from "@/lib/reader-library";
-import { ensureAwesomeFdeReaderSeed } from "@/lib/reader-seed-import";
+import { ensureBuiltinReaderSeeds } from "@/lib/reader-seed-import";
 
 type ReaderAppProps = {
   containerId: string;
@@ -44,7 +44,7 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
 
   useEffect(() => {
     let cancelled = false;
-    void ensureAwesomeFdeReaderSeed().then((next) => {
+    void ensureBuiltinReaderSeeds().then((next) => {
       if (!cancelled && next) {
         setLibrary(next);
       }
