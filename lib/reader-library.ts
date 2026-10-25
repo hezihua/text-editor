@@ -13,6 +13,9 @@ export type ReaderArticle = {
   content: string;
   savedAt: number;
   updatedAt: number;
+  /** 侧栏分组（入库时可写入；缺省则按 id/标题推断） */
+  groupKey?: string;
+  groupLabel?: string;
 };
 
 export type ReaderLibrary = {

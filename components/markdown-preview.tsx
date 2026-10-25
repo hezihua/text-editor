@@ -43,7 +43,18 @@ export function MarkdownPreview({ content, onClose }: MarkdownPreviewProps) {
       </div>
       <div className="markdown-preview min-h-0 flex-1 overflow-y-auto p-4 text-[15px] leading-relaxed text-stone-800">
         {content.trim() ? (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              table: ({ children, ...props }) => (
+                <div className="table-wrap">
+                  <table {...props}>{children}</table>
+                </div>
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
         ) : (
           <p className="text-sm text-stone-400">暂无内容</p>
         )}

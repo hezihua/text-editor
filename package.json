@@ -13,28 +13,37 @@
     "start": "next start",
     "lint": "eslint",
     "env:sync": "bash scripts/sync-vercel-env.sh",
-    "check:regression": "tsx scripts/check-regression.ts"
+    "check:regression": "tsx scripts/check-regression.ts",
+    "reader:seed-awesome-fde": "tsx scripts/build-awesome-fde-reader-seed.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.91",
     "ai": "^7.0.136",
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.19.1",
     "lucide-react": "^1.53.0",
     "next": "16.4.0",
+    "next-mdx-remote": "^6.0.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
-    "dotenv": "^16.4.7",
     "tsx": "^4.19.3",
     "typescript": "^5"
   }

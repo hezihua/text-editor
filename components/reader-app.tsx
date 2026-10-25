@@ -1,16 +1,12 @@
 "use client";
 
-import {
-  ArrowLeft,
-  BookOpen,
-  ExternalLink,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MarkdownArticleView } from "@/components/markdown-article-view";
+import { ReaderArticleList } from "@/components/reader-article-list";
 import { ResizeSplit } from "@/components/resize-split";
 import {
   articlesInContainer,
@@ -19,6 +15,7 @@ import {
   loadReaderLibrary,
   type ReaderLibrary,
 } from "@/lib/reader-library";
+import { ensureAwesomeFdeReaderSeed } from "@/lib/reader-seed-import";
 
 type ReaderAppProps = {
   containerId: string;
@@ -26,6 +23,7 @@ type ReaderAppProps = {
 
 export function ReaderApp({ containerId }: ReaderAppProps) {
   const router = useRouter();
+  const articleScrollRef = useRef<HTMLDivElement>(null);
   const [library, setLibrary] = useState<ReaderLibrary | null>(null);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(
     null,
@@ -43,6 +41,18 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void ensureAwesomeFdeReaderSeed().then((next) => {
+      if (!cancelled && next) {
+        setLibrary(next);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const container = useMemo(() => {
     if (!library) return null;
@@ -138,46 +148,13 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
 
       <div className="flex min-h-0 flex-1 flex-col p-3">
         <span className="mb-2 text-xs font-medium text-stone-600">文章</span>
-        {articles.length === 0 ? (
-          <p className="text-xs leading-relaxed text-stone-400">
-            此文集暂无文章。在编辑器中改好后点「保存到阅读器」。
-          </p>
-        ) : (
-          <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto">
-            {articles.map((a) => (
-              <li key={a.id} className="flex items-start gap-1">
-                <button
-                  type="button"
-                  onClick={() => setSelectedArticleId(a.id)}
-                  className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-left ${
-                    selectedArticleId === a.id
-                      ? "bg-stone-900 text-white shadow-sm"
-                      : "hover:bg-stone-200/50"
-                  }`}
-                >
-                  <div className="truncate text-sm font-medium">{a.title}</div>
-                  <div
-                    className={`text-[10px] ${
-                      selectedArticleId === a.id
-                        ? "text-stone-300"
-                        : "text-stone-400"
-                    }`}
-                  >
-                    {new Date(a.updatedAt).toLocaleString("zh-CN")}
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteArticle(a.id)}
-                  className="shrink-0 rounded p-1 text-stone-400 hover:text-red-600"
-                  title="删除"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ReaderArticleList
+          containerId={containerId}
+          articles={articles}
+          selectedArticleId={selectedArticleId}
+          onSelect={setSelectedArticleId}
+          onDelete={handleDeleteArticle}
+        />
       </div>
     </div>
   );
@@ -200,8 +177,15 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
               新标签页阅读
             </Link>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-            <MarkdownArticleView content={selectedArticle.content} />
+          <div
+            ref={articleScrollRef}
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+          >
+            <MarkdownArticleView
+              source={selectedArticle.content}
+              withToc
+              scrollRootRef={articleScrollRef}
+            />
           </div>
         </>
       ) : (

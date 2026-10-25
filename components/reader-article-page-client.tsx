@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { MarkdownArticleView } from "@/components/markdown-article-view";
 import {
@@ -20,6 +20,7 @@ export function ReaderArticlePageClient({
 }: ReaderArticlePageClientProps) {
   const [article, setArticle] = useState<ReaderArticle | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const mainScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const lib = loadReaderLibrary();
@@ -68,8 +69,17 @@ export function ReaderArticlePageClient({
           {article.title}
         </h1>
       </header>
-      <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto px-6 py-8">
-        <MarkdownArticleView content={article.content} />
+      <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+        <div
+          ref={mainScrollRef}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
+        <MarkdownArticleView
+          source={article.content}
+          withToc
+          scrollRootRef={mainScrollRef}
+        />
+        </div>
       </main>
     </div>
   );
