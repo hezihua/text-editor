@@ -42,7 +42,7 @@ export function MdxReaderLayout({
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
       <div className="min-h-0 min-w-0 flex-1">{column}</div>
-      <aside className="hidden w-52 shrink-0 border-l border-stone-100 bg-stone-50/50 xl:block">
+      <aside className="hidden w-48 shrink-0 border-l border-stone-100 bg-stone-50/50 lg:block xl:w-52">
         <ArticleTableOfContents
           items={tocItems}
           scrollRootRef={scrollRootRef}

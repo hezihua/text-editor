@@ -14,14 +14,21 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function normalizeMarkdownLines(markdown: string): string[] {
+  return markdown
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .split("\n");
+}
+
 /** 从 Markdown 源码解析 h2/h3，生成与正文标题一致的 id */
 export function parseMarkdownHeadings(markdown: string): MarkdownHeading[] {
-  const lines = markdown.split("\n");
+  const lines = normalizeMarkdownLines(markdown);
   const headings: MarkdownHeading[] = [];
   const slugCounts = new Map<string, number>();
 
   for (const line of lines) {
-    const match = line.match(/^(#{2,3})\s+(.+)$/);
+    const match = line.trimEnd().match(/^(#{2,3})\s+(.+)$/);
     if (!match) continue;
 
     const depth = match[1]!.length;
