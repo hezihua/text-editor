@@ -2,19 +2,15 @@
 
 import {
   AlertCircle,
-  BookOpen,
-  BookmarkPlus,
   Copy,
   Download,
   FileDiff,
   PanelRightOpen,
   Upload,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CheckPanel } from "@/components/check-panel";
-import { SaveToReaderDialog } from "@/components/save-to-reader-dialog";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { ResizeSplit } from "@/components/resize-split";
 import { TranslateMenu } from "@/components/translate-menu";
@@ -83,8 +79,6 @@ export function Workspace() {
     null,
   );
   const [issueActionHint, setIssueActionHint] = useState<string | null>(null);
-  const [saveReaderOpen, setSaveReaderOpen] = useState(false);
-  const [readerSaveHint, setReaderSaveHint] = useState<string | null>(null);
 
   useEffect(() => {
     setCheckHistory(loadCheckHistory());
@@ -476,24 +470,6 @@ export function Workspace() {
                 <Download className="h-3.5 w-3.5" />
                 导出
               </button>
-              <button
-                type="button"
-                disabled={!text.trim()}
-                onClick={() => setSaveReaderOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <BookmarkPlus className="h-3.5 w-3.5" />
-                {readerSaveHint ?? "保存到阅读器"}
-              </button>
-              <Link
-                href="/reader"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50"
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                阅读器
-              </Link>
               <TranslateMenu
                 disabled={!text.trim()}
                 loading={translateLoading}
@@ -632,16 +608,6 @@ export function Workspace() {
           }
         />
       </main>
-      <SaveToReaderDialog
-        open={saveReaderOpen}
-        onClose={() => setSaveReaderOpen(false)}
-        content={text}
-        documentName={documentName}
-        onSaved={() => {
-          setReaderSaveHint("已保存");
-          window.setTimeout(() => setReaderSaveHint(null), 2500);
-        }}
-      />
     </div>
   );
 }

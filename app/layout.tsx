@@ -9,8 +9,11 @@ const notoSans = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "笔耕 — 智能写作检查",
-  description: "中文写作文案的语法、表达与风格检查，体裁不限",
+  title: {
+    default: "笔耕",
+    template: "%s · 笔耕",
+  },
+  description: "智能写作检查与 Markdown 阅读",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
