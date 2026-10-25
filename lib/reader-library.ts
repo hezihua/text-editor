@@ -38,19 +38,25 @@ function defaultLibrary(): ReaderLibrary {
   };
 }
 
+function loadOrInitLibrary(): ReaderLibrary {
+  const lib = defaultLibrary();
+  saveReaderLibrary(lib);
+  return lib;
+}
+
 export function loadReaderLibrary(): ReaderLibrary {
   if (typeof window === "undefined") return defaultLibrary();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultLibrary();
+    if (!raw) return loadOrInitLibrary();
     const parsed = JSON.parse(raw) as ReaderLibrary;
-    if (!parsed.containers?.length) return defaultLibrary();
+    if (!parsed.containers?.length) return loadOrInitLibrary();
     return {
       containers: parsed.containers,
       articles: parsed.articles ?? [],
     };
   } catch {
-    return defaultLibrary();
+    return loadOrInitLibrary();
   }
 }
 

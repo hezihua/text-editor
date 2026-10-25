@@ -7,6 +7,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MarkdownArticleView } from "@/components/markdown-article-view";
@@ -14,6 +15,7 @@ import { ResizeSplit } from "@/components/resize-split";
 import {
   articlesInContainer,
   deleteArticle,
+  getArticle,
   loadReaderLibrary,
   type ReaderLibrary,
 } from "@/lib/reader-library";
@@ -23,6 +25,7 @@ type ReaderAppProps = {
 };
 
 export function ReaderApp({ containerId }: ReaderAppProps) {
+  const router = useRouter();
   const [library, setLibrary] = useState<ReaderLibrary | null>(null);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(
     null,
@@ -45,6 +48,16 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
     if (!library) return null;
     return library.containers.find((c) => c.id === containerId) ?? null;
   }, [library, containerId]);
+
+  const articleForMisroutedId = useMemo(() => {
+    if (!library || container) return null;
+    return getArticle(library, containerId) ?? null;
+  }, [library, container, containerId]);
+
+  useEffect(() => {
+    if (!articleForMisroutedId) return;
+    router.replace(`/reader/article/${articleForMisroutedId.id}`);
+  }, [articleForMisroutedId, router]);
 
   const articles = useMemo(() => {
     if (!library) return [];
@@ -75,9 +88,19 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
   }
 
   if (!container) {
+    if (articleForMisroutedId) {
+      return (
+        <div className="flex h-dvh items-center justify-center text-sm text-stone-500">
+          正在打开文章…
+        </div>
+      );
+    }
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-4 p-6">
         <p className="text-sm text-stone-500">未找到该文集</p>
+        <p className="max-w-sm text-center text-xs leading-relaxed text-stone-400">
+          阅读数据保存在本机浏览器中。若曾清除站点数据或换了浏览器，旧链接会失效。
+        </p>
         <Link
           href="/reader"
           className="rounded-lg bg-stone-900 px-4 py-2 text-sm text-white hover:bg-stone-800"
