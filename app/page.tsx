@@ -1,50 +1,67 @@
 import { BookOpen, PenLine } from "lucide-react";
 import Link from "next/link";
 
+import { SiteHeader } from "@/components/site-header";
+
 export const metadata = {
   title: "笔耕",
   description: "智能写作检查与 Markdown 阅读",
 };
 
+const ENTRIES = [
+  {
+    href: "/editor",
+    kicker: "写作",
+    title: "编辑器",
+    description: "上传或撰写 Markdown，AI 检查与改稿。",
+    icon: PenLine,
+  },
+  {
+    href: "/reader",
+    kicker: "阅读",
+    title: "阅读器",
+    description: "浏览文集与内置课程笔记，表格、公式与目录导航。",
+    icon: BookOpen,
+  },
+] as const;
+
 export default function HomePage() {
   return (
-    <div className="flex h-dvh flex-col items-center justify-center bg-[var(--background)] px-6">
-      <div className="w-full max-w-lg text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-stone-900">
-          笔耕
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-500">
+    <div className="shelf-paper h-dvh overflow-y-auto text-stone-900">
+      <SiteHeader active="/" />
+      <main className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-8">
+        <h1 className="text-[28px] font-semibold tracking-tight">笔耕</h1>
+        <p className="mt-2 text-sm text-stone-500">
           改稿与阅读分开入口，各用其所。
         </p>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <Link
-            href="/editor"
-            className="group flex flex-col items-start rounded-2xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md"
-          >
-            <span className="mb-3 inline-flex rounded-lg bg-stone-900 p-2.5 text-white">
-              <PenLine className="h-5 w-5" />
-            </span>
-            <span className="text-lg font-semibold text-stone-900">编辑器</span>
-            <span className="mt-1 text-xs leading-relaxed text-stone-500">
-              上传或撰写 Markdown，AI 检查与改稿。
-            </span>
-          </Link>
-
-          <Link
-            href="/reader"
-            className="group flex flex-col items-start rounded-2xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md"
-          >
-            <span className="mb-3 inline-flex rounded-lg bg-stone-100 p-2.5 text-stone-800">
-              <BookOpen className="h-5 w-5" />
-            </span>
-            <span className="text-lg font-semibold text-stone-900">阅读器</span>
-            <span className="mt-1 text-xs leading-relaxed text-stone-500">
-              浏览文集与内置课程笔记，表格、公式与目录导航。
-            </span>
-          </Link>
-        </div>
-      </div>
+        <ul className="mt-10 grid max-w-xl grid-cols-2 gap-x-8 gap-y-10">
+          {ENTRIES.map((entry) => {
+            const Icon = entry.icon;
+            return (
+              <li key={entry.href}>
+                <Link
+                  href={entry.href}
+                  className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-800"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3e2b0] text-[#8a5a12] transition duration-200 group-hover:-translate-y-0.5">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <p className="mt-4 text-[10px] font-semibold tracking-[0.14em] text-stone-400">
+                    {entry.kicker}
+                  </p>
+                  <h2 className="mt-1 text-[15px] font-semibold leading-snug group-hover:underline">
+                    {entry.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                    {entry.description}
+                  </p>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </main>
     </div>
   );
 }

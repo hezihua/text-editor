@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowUpRight, BookOpen, Trash2 } from "lucide-react";
+import { ArrowUpRight, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { BookCover } from "@/components/book-cover";
+import { SiteHeader } from "@/components/site-header";
 import {
   deleteContainer,
   isExcludedContainer,
@@ -12,11 +13,6 @@ import {
   type ReaderLibrary,
 } from "@/lib/reader-library";
 import { ensureBuiltinReaderSeeds } from "@/lib/reader-seed-import";
-
-const NAV = [
-  { href: "/", label: "首页" },
-  { href: "/reader", label: "精选收录" },
-] as const;
 
 function bookFace(name: string): {
   coverTitle: string;
@@ -156,37 +152,7 @@ export function ReaderLibraryPage() {
 
   return (
     <div className="shelf-paper h-dvh overflow-y-auto text-stone-900">
-      <header className="sticky top-0 z-20 border-b border-stone-300/70 bg-[#f6f3ec]/90 backdrop-blur-md">
-        <div className="mx-auto grid h-14 max-w-[1120px] grid-cols-[1fr_auto_1fr] items-stretch px-5 sm:px-8">
-          <Link href="/" className="flex items-center gap-2 justify-self-start">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3e2b0] text-[#8a5a12]">
-              <BookOpen className="h-4 w-4" />
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight">笔耕</span>
-          </Link>
-
-          <nav className="flex items-stretch gap-5 text-sm sm:gap-8">
-            {NAV.map((item) => {
-              const active = item.href === "/reader";
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex items-center border-b-2 ${
-                    active
-                      ? "border-stone-900 font-medium text-stone-900"
-                      : "border-transparent text-stone-500 hover:text-stone-900"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <span />
-        </div>
-      </header>
+      <SiteHeader active="/reader" />
 
       <main className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-8">
         <div className="flex items-end justify-between gap-6">
