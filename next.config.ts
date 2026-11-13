@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   transpilePackages: ["next-mdx-remote"],
   cacheComponents: true,
   partialPrefetching: true,
