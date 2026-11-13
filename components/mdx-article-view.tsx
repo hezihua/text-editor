@@ -77,7 +77,7 @@ export function MdxArticleView({
   }, [source]);
 
   const articleInner = (
-    <div className="mx-auto max-w-3xl px-6 py-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-8 py-10 lg:px-12">
       {loading && (
         <p className="text-sm text-stone-500">正在排版…</p>
       )}
@@ -88,12 +88,12 @@ export function MdxArticleView({
       )}
       {!loading && !error && compiled && (
         <article
-          className={`mdx-document prose prose-stone max-w-none text-[15px] leading-relaxed text-stone-800 ${className}`}
+          className={`mdx-document prose prose-stone max-w-none text-[16px] leading-8 text-stone-800 ${className}`}
         >
           {(title || description || tags.length > 0) && (
-            <header className="not-prose mb-8 border-b border-stone-200 pb-6">
+            <header className="not-prose mb-10">
               {title && (
-                <h1 className="mb-2 text-2xl font-bold tracking-tight text-stone-900">
+                <h1 className="mb-3 text-[1.75rem] font-semibold tracking-tight text-stone-900">
                   {title}
                 </h1>
               )}

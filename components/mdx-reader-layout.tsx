@@ -29,7 +29,7 @@ export function MdxReaderLayout({
   ) : (
     <div
       ref={internalScrollRef}
-      className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain"
+      className="scrollbar-none min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain"
     >
       {children}
     </div>
@@ -40,9 +40,11 @@ export function MdxReaderLayout({
   }
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1">
-      <div className="min-h-0 min-w-0 flex-1">{column}</div>
-      <aside className="hidden w-48 shrink-0 border-l border-stone-100 bg-stone-50/50 lg:block xl:w-52">
+    <div className="flex h-full min-h-0 min-w-0 w-full flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {column}
+      </div>
+      <aside className="scrollbar-none h-full w-52 shrink-0 overflow-y-auto xl:w-56">
         <ArticleTableOfContents
           items={tocItems}
           scrollRootRef={scrollRootRef}

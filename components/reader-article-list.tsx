@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   groupReaderArticles,
   shouldUseGroupedSidebar,
-  titleInGroupIndex,
+  stripTitleNumberPrefix,
 } from "@/lib/reader-article-groups";
 import type { ReaderArticle } from "@/lib/reader-library";
 
@@ -87,34 +87,27 @@ export function ReaderArticleList({
     });
   }, [selectedArticleId, useGroups, groups, containerId]);
 
-  function renderArticleRow(a: ReaderArticle, displayTitle?: string) {
+  function renderArticleRow(a: ReaderArticle) {
     const selected = selectedArticleId === a.id;
-    const line = displayTitle ?? a.title;
+    const line = stripTitleNumberPrefix(a.title);
     return (
-      <li key={a.id} className="flex items-start gap-1">
+      <li key={a.id} className="group/row flex items-start gap-1">
         <button
           type="button"
           onClick={() => onSelect(a.id)}
           title={a.title}
-          className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-left ${
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-left text-[13px] leading-snug ${
             selected
-              ? "bg-stone-900 text-white shadow-sm"
-              : "hover:bg-stone-200/50"
+              ? "font-medium text-stone-900"
+              : "text-stone-500 hover:text-stone-800"
           }`}
         >
-          <div className="truncate text-sm font-medium">{line}</div>
-          <div
-            className={`text-[10px] ${
-              selected ? "text-stone-300" : "text-stone-400"
-            }`}
-          >
-            {new Date(a.updatedAt).toLocaleString("zh-CN")}
-          </div>
+          <span className="line-clamp-2">{line}</span>
         </button>
         <button
           type="button"
           onClick={() => onDelete(a.id)}
-          className="shrink-0 rounded p-1 text-stone-400 hover:text-red-600"
+          className="mt-1 shrink-0 rounded p-1 text-stone-300 opacity-0 hover:text-red-600 group-hover/row:opacity-100 focus:opacity-100"
           title="删除"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -133,41 +126,36 @@ export function ReaderArticleList({
 
   if (!useGroups) {
     return (
-      <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto">
+      <ul className="scrollbar-none min-h-0 flex-1 space-y-1 overflow-y-auto">
         {articles.map((a) => renderArticleRow(a))}
       </ul>
     );
   }
 
   return (
-    <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+    <div className="scrollbar-none min-h-0 flex-1 space-y-2 overflow-y-auto">
       {groups.map(({ group, articles: groupArticles }) => {
         const isCollapsed = collapsed[group.key] === true;
         return (
-          <section key={group.key} className="rounded-lg border border-stone-200/80 bg-white/60">
+          <section key={group.key} className="pt-3">
             <button
               type="button"
               onClick={() => toggleGroup(group.key)}
-              className="flex w-full items-center gap-1.5 rounded-lg px-2 py-2 text-left hover:bg-stone-100/80"
+              className="flex w-full items-center gap-1.5 px-2 py-1 text-left"
               aria-expanded={!isCollapsed}
             >
               <ChevronDown
-                className={`h-3.5 w-3.5 shrink-0 text-stone-500 transition-transform ${
+                className={`h-3 w-3 shrink-0 text-stone-400 transition-transform ${
                   isCollapsed ? "-rotate-90" : ""
                 }`}
               />
-              <span className="min-w-0 flex-1 truncate text-xs font-semibold text-stone-700">
+              <span className="min-w-0 flex-1 truncate text-[11px] font-medium tracking-wide text-stone-400">
                 {group.label}
-              </span>
-              <span className="shrink-0 text-[10px] tabular-nums text-stone-400">
-                {groupArticles.length}
               </span>
             </button>
             {!isCollapsed && (
-              <ul className="space-y-1 px-1 pb-2 pt-0.5">
-                {groupArticles.map((a, index) =>
-                  renderArticleRow(a, titleInGroupIndex(a.title, index)),
-                )}
+              <ul className="mt-0.5">
+                {groupArticles.map((a) => renderArticleRow(a))}
               </ul>
             )}
           </section>

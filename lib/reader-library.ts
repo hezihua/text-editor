@@ -35,34 +35,52 @@ function newId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function defaultLibrary(): ReaderLibrary {
-  const id = newId();
-  return {
-    containers: [{ id, name: "默认文集", createdAt: Date.now() }],
-    articles: [],
-  };
+/** 精选收录不展示的占位文集。 */
+const EXCLUDED_CONTAINER_NAMES = new Set(["默认文集", "我的任务"]);
+
+function emptyLibrary(): ReaderLibrary {
+  return { containers: [], articles: [] };
 }
 
 function loadOrInitLibrary(): ReaderLibrary {
-  const lib = defaultLibrary();
+  const lib = emptyLibrary();
   saveReaderLibrary(lib);
   return lib;
 }
 
 export function loadReaderLibrary(): ReaderLibrary {
-  if (typeof window === "undefined") return defaultLibrary();
+  if (typeof window === "undefined") return emptyLibrary();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return loadOrInitLibrary();
     const parsed = JSON.parse(raw) as ReaderLibrary;
-    if (!parsed.containers?.length) return loadOrInitLibrary();
-    return {
+    if (!Array.isArray(parsed.containers)) return loadOrInitLibrary();
+    return dropExcludedContainers({
       containers: parsed.containers,
       articles: parsed.articles ?? [],
-    };
+    });
   } catch {
     return loadOrInitLibrary();
   }
+}
+
+export function isExcludedContainer(name: string): boolean {
+  return EXCLUDED_CONTAINER_NAMES.has(name);
+}
+
+function dropExcludedContainers(lib: ReaderLibrary): ReaderLibrary {
+  const dropIds = new Set(
+    lib.containers
+      .filter((container) => EXCLUDED_CONTAINER_NAMES.has(container.name))
+      .map((container) => container.id),
+  );
+  if (dropIds.size === 0) return lib;
+  const next: ReaderLibrary = {
+    containers: lib.containers.filter((container) => !dropIds.has(container.id)),
+    articles: lib.articles.filter((article) => !dropIds.has(article.containerId)),
+  };
+  saveReaderLibrary(next);
+  return next;
 }
 
 export function saveReaderLibrary(lib: ReaderLibrary): void {
@@ -94,7 +112,7 @@ export function deleteContainer(
     articles: lib.articles.filter((a) => a.containerId !== containerId),
   };
   if (next.containers.length === 0) {
-    const fresh = defaultLibrary();
+    const fresh = emptyLibrary();
     saveReaderLibrary(fresh);
     return fresh;
   }
@@ -178,6 +196,15 @@ export function articlesInContainer(
   return lib.articles
     .filter((a) => a.containerId === containerId)
     .sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+/** 文章 id 可能含 `/`，按路径段编码后才能落在阅读页路由上。 */
+export function readerArticleHref(articleId: string): string {
+  const path = articleId
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `/reader/article/${path}`;
 }
 
 /** 从文件名得到展示标题 */

@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { MarkdownArticleView } from "@/components/markdown-article-view";
 import {
@@ -20,7 +20,6 @@ export function ReaderArticlePageClient({
 }: ReaderArticlePageClientProps) {
   const [article, setArticle] = useState<ReaderArticle | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const mainScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const lib = loadReaderLibrary();
@@ -51,35 +50,26 @@ export function ReaderArticlePageClient({
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[var(--background)]">
-      <header className="flex shrink-0 items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
-        <Link
-          href={
-            article
-              ? `/reader/${article.containerId}`
-              : "/reader"
-          }
-          className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          阅读器
+    <div className="shelf-paper flex h-dvh flex-col overflow-hidden text-stone-900">
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-stone-300/60 px-5 text-sm text-stone-500">
+        <Link href="/reader" className="inline-flex items-center gap-1 hover:text-stone-900">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          精选收录
         </Link>
-        <span className="text-stone-300">/</span>
-        <h1 className="truncate text-sm font-semibold text-stone-900">
-          {article.title}
+        <span aria-hidden>/</span>
+        <Link
+          href={`/reader/${article.containerId}`}
+          className="hover:text-stone-900"
+        >
+          文集
+        </Link>
+        <span aria-hidden>/</span>
+        <h1 className="truncate text-stone-800">
+          {article.title.replace(/^\d{1,2}\s*[·•.\-—]\s*/, "")}
         </h1>
       </header>
-      <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-        <div
-          ref={mainScrollRef}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
-        >
-        <MarkdownArticleView
-          source={article.content}
-          withToc
-          scrollRootRef={mainScrollRef}
-        />
-        </div>
+      <main className="flex min-h-0 w-full flex-1">
+        <MarkdownArticleView source={article.content} withToc />
       </main>
     </div>
   );

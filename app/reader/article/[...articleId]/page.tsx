@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { ReaderArticlePageClient } from "@/components/reader-article-page-client";
 
 type PageProps = {
-  params: Promise<{ articleId: string }>;
+  params: Promise<{ articleId: string[] }>;
 };
 
 async function ReaderArticleWithParams({ params }: PageProps) {
   const { articleId } = await params;
-  return <ReaderArticlePageClient articleId={articleId} />;
+  return <ReaderArticlePageClient articleId={articleId.join("/")} />;
 }
 
 function ReaderArticleFallback() {

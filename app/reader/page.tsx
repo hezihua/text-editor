@@ -1,8 +1,8 @@
 import { ReaderLibraryPage } from "@/components/reader-library-page";
 
 export const metadata = {
-  title: "阅读器",
-  description: "选择文集进入阅读",
+  title: "精选收录",
+  description: "按文集浏览已收录的文章",
 };
 
 export default function ReaderIndexPage() {

@@ -60,11 +60,11 @@ export function ArticleTableOfContents({
   if (items.length === 0) return null;
 
   return (
-    <div className="sticky top-0 max-h-full overflow-y-auto py-6 pl-2 pr-4">
-      <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-400">
-        目录导航
+    <div className="py-6 pl-2 pr-4">
+      <div className="mb-3 px-2 text-[11px] tracking-wide text-stone-400">
+        本篇目录
       </div>
-      <nav aria-label="目录导航">
+      <nav aria-label="本篇目录">
         <ul className="flex flex-col gap-0.5">
           {items.map((item) => {
             const isActive = activeId === item.id;
@@ -74,14 +74,12 @@ export function ArticleTableOfContents({
                 <a
                   href={`#${item.id}`}
                   onClick={(e) => handleClick(e, item.id)}
-                  className={`block rounded-md px-2.5 py-1.5 leading-snug transition-colors ${
-                    isH2
-                      ? "text-[13px] font-medium text-stone-700"
-                      : "pl-6 text-xs text-stone-500"
+                  className={`block px-2 py-1 leading-snug transition-colors ${
+                    isH2 ? "text-[13px]" : "pl-5 text-xs"
                   } ${
                     isActive
-                      ? "bg-stone-100 font-semibold text-stone-900"
-                      : "hover:bg-stone-50 hover:text-stone-800"
+                      ? "font-medium text-stone-900"
+                      : "text-stone-500 hover:text-stone-800"
                   }`}
                   title={item.text}
                 >

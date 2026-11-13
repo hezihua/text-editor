@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowLeft, BookOpen, ExternalLink } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MarkdownArticleView } from "@/components/markdown-article-view";
 import { ReaderArticleList } from "@/components/reader-article-list";
@@ -13,6 +13,7 @@ import {
   deleteArticle,
   getArticle,
   loadReaderLibrary,
+  readerArticleHref,
   type ReaderLibrary,
 } from "@/lib/reader-library";
 import { ensureBuiltinReaderSeeds } from "@/lib/reader-seed-import";
@@ -23,7 +24,6 @@ type ReaderAppProps = {
 
 export function ReaderApp({ containerId }: ReaderAppProps) {
   const router = useRouter();
-  const articleScrollRef = useRef<HTMLDivElement>(null);
   const [library, setLibrary] = useState<ReaderLibrary | null>(null);
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(
     null,
@@ -66,7 +66,7 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
 
   useEffect(() => {
     if (!articleForMisroutedId) return;
-    router.replace(`/reader/article/${articleForMisroutedId.id}`);
+    router.replace(readerArticleHref(articleForMisroutedId.id));
   }, [articleForMisroutedId, router]);
 
   const articles = useMemo(() => {
@@ -130,84 +130,62 @@ export function ReaderApp({ containerId }: ReaderAppProps) {
     if (selectedArticleId === id) setSelectedArticleId(null);
   }
 
-  const sidebar = (
-    <div className="flex h-full min-h-0 flex-col border-r border-stone-200 bg-stone-50">
-      <div className="shrink-0 border-b border-stone-200 px-3 py-3">
-        <Link
-          href="/reader"
-          className="inline-flex items-center gap-1 text-xs text-stone-500 hover:text-stone-800"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          文集
-        </Link>
-        <div className="mt-2 flex items-center gap-2 text-stone-800">
-          <BookOpen className="h-4 w-4 shrink-0" />
-          <span className="truncate text-sm font-semibold">{container.name}</span>
-        </div>
-      </div>
-
-      <div className="flex min-h-0 flex-1 flex-col p-3">
-        <span className="mb-2 text-xs font-medium text-stone-600">文章</span>
-        <ReaderArticleList
-          containerId={containerId}
-          articles={articles}
-          selectedArticleId={selectedArticleId}
-          onSelect={setSelectedArticleId}
-          onDelete={handleDeleteArticle}
-        />
-      </div>
-    </div>
-  );
-
-  const readerPane = (
-    <div className="flex h-full min-h-0 flex-col bg-white">
-      {selectedArticle ? (
-        <>
-          <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-3">
-            <h1 className="text-lg font-semibold text-stone-900">
-              {selectedArticle.title}
-            </h1>
-            <Link
-              href={`/reader/article/${selectedArticle.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              新标签页阅读
-            </Link>
-          </header>
-          <div
-            ref={articleScrollRef}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
-          >
-            <MarkdownArticleView
-              source={selectedArticle.content}
-              withToc
-              scrollRootRef={articleScrollRef}
-            />
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center text-stone-400">
-          <BookOpen className="h-10 w-10 opacity-40" />
-          <p className="text-sm">选择左侧文章开始阅读</p>
-        </div>
-      )}
-    </div>
-  );
+  const bookName = container.name.split("·")[0]?.trim() || container.name;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[var(--background)]">
+    <div className="shelf-paper flex h-dvh flex-col overflow-hidden text-stone-900">
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-stone-300/60 px-5 text-sm text-stone-500">
+        <Link href="/" className="hover:text-stone-900">
+          笔耕
+        </Link>
+        <span aria-hidden>/</span>
+        <Link href="/reader" className="hover:text-stone-900">
+          精选收录
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="truncate text-stone-800">{bookName}</span>
+        {selectedArticle && (
+          <>
+            <span aria-hidden>/</span>
+            <span className="truncate text-stone-800">
+              {selectedArticle.title.replace(/^\d{1,2}\s*[·•.\-—]\s*/, "")}
+            </span>
+          </>
+        )}
+      </header>
+
       <ResizeSplit
         className="min-h-0 flex-1"
         storageKey="split-reader-main"
-        initialRatio={0.32}
-        minFirstPx={240}
-        minSecondPx={320}
-        stackBelowLg
-        first={sidebar}
-        second={readerPane}
+        initialRatio={0.22}
+        minFirstPx={200}
+        minSecondPx={480}
+        first={
+          <aside className="scrollbar-none flex h-full min-h-0 flex-col overflow-y-auto px-3 py-6">
+            <p className="mb-3 truncate px-2 text-[11px] tracking-wide text-stone-400">
+              {bookName}
+            </p>
+            <ReaderArticleList
+              containerId={containerId}
+              articles={articles}
+              selectedArticleId={selectedArticleId}
+              onSelect={setSelectedArticleId}
+              onDelete={handleDeleteArticle}
+            />
+          </aside>
+        }
+        second={
+          <div className="flex h-full min-h-0 min-w-0">
+            {selectedArticle ? (
+              <MarkdownArticleView source={selectedArticle.content} withToc />
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center text-stone-400">
+                <BookOpen className="h-10 w-10 opacity-40" />
+                <p className="text-sm">选择左侧文章开始阅读</p>
+              </div>
+            )}
+          </div>
+        }
       />
     </div>
   );
