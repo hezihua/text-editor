@@ -89,7 +89,7 @@ export function CheckPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 space-y-2 border-b border-stone-100 p-3">
+      <div className="shrink-0 space-y-2 border-b border-stone-300/60 p-3">
         <CheckDirectionSelect
           value={direction}
           onChange={onDirectionChange}
@@ -105,7 +105,7 @@ export function CheckPanel({
           type="button"
           onClick={onRunCheck}
           disabled={loading || !canRun}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white py-2.5 text-sm font-medium text-stone-800 shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-300/70 bg-white/80 py-2.5 text-sm font-medium text-stone-800 transition hover:border-stone-400 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -118,7 +118,7 @@ export function CheckPanel({
           type="button"
           onClick={onApplyAll}
           disabled={loading || visibleIssues.length === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-900 bg-stone-900 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-900 bg-stone-900 py-2.5 text-sm font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <CheckCheck className="h-4 w-4" />
           全部应用
@@ -134,7 +134,7 @@ export function CheckPanel({
         </p>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-3 pb-10">
+      <div className="scrollbar-none min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-3 pb-10">
         <CheckHistoryList entries={checkHistory} />
 
         {!check && !loading && (
@@ -179,10 +179,10 @@ export function CheckPanel({
             <article
               key={issue.id}
               ref={isActive ? (el) => { activeRef.current = el; } : undefined}
-              className={`overflow-hidden rounded-xl border bg-white text-sm shadow-sm transition ${
+              className={`overflow-hidden rounded-lg border bg-white/90 text-sm transition ${
                 isActive
-                  ? "border-stone-400 ring-2 ring-stone-300/80"
-                  : "border-stone-200"
+                  ? "border-stone-500 ring-1 ring-stone-400/40"
+                  : "border-stone-300/70"
               }`}
             >
               <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-3 py-2">

@@ -154,7 +154,7 @@ export function ReaderLibraryPage() {
     <div className="shelf-paper h-dvh overflow-y-auto text-stone-900">
       <SiteHeader active="/reader" />
 
-      <main className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-8">
+      <main className="w-full px-5 py-10 sm:px-8">
         <div className="flex items-end justify-between gap-6">
           <div>
             <h1 className="text-[28px] font-semibold tracking-tight">精选收录</h1>
@@ -165,7 +165,7 @@ export function ReaderLibraryPage() {
           <p className="shrink-0 pb-1 text-sm text-stone-500">共 {bookCount} 本</p>
         </div>
 
-        <ul className="mt-10 grid grid-cols-4 gap-x-8 gap-y-10">
+        <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-x-8 xl:grid-cols-[repeat(6,15rem)]">
           {shelf.map(({ container, articles }) => {
             const face = bookFace(container.name);
             return (

@@ -28,6 +28,15 @@ body {
   background-size: 32px 32px;
 }
 
+.work-surface {
+  background-color: #faf8f4;
+}
+
+::selection {
+  background-color: rgba(243, 226, 176, 0.65);
+  color: var(--foreground);
+}
+
 .book-serif {
   font-family: "Songti SC", "STSong", "SimSun", "PMingLiU", var(--font-noto),
     "Noto Sans SC", sans-serif;

@@ -36,7 +36,7 @@ type DocumentEditorProps = {
 };
 
 const EDITOR_CLASS =
-  "w-full resize-none bg-transparent p-4 text-[15px] leading-relaxed outline-none";
+  "scrollbar-none w-full resize-none bg-transparent p-4 text-[15px] leading-relaxed outline-none";
 
 export const DocumentEditor = forwardRef<
   DocumentEditorHandle,
@@ -160,11 +160,11 @@ export const DocumentEditor = forwardRef<
   }));
 
   return (
-    <div className="flex h-full min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-stone-50/50">
+    <div className="flex h-full min-h-0 flex-1 overflow-hidden rounded-lg border border-stone-300/70 bg-white/60">
       <div
         ref={gutterRef}
         aria-hidden
-        className="hidden shrink-0 overflow-hidden border-r border-stone-200 bg-stone-100/80 py-4 pr-2 pl-3 text-right sm:block"
+        className="hidden shrink-0 overflow-hidden border-r border-stone-300/60 bg-[#f6f3ec]/40 py-4 pr-2 pl-3 text-right sm:block"
       >
         <div className="font-mono text-[13px] leading-relaxed text-stone-400 select-none">
           {Array.from({ length: lines }, (_, i) => (
@@ -195,7 +195,7 @@ export const DocumentEditor = forwardRef<
           onScroll={useDecoratedOverlay ? syncScroll : undefined}
           placeholder={placeholder}
           spellCheck={false}
-          className={`${EDITOR_CLASS} relative z-10 h-full caret-stone-900 selection:bg-sky-200/50 focus:ring-2 focus:ring-rose-500/30 ${
+          className={`${EDITOR_CLASS} relative z-10 h-full caret-stone-900 focus:ring-2 focus:ring-stone-400/25 ${
             useDecoratedOverlay ? "text-transparent" : "text-stone-900"
           }`}
         />

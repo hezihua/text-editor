@@ -2,17 +2,16 @@
 
 import {
   AlertCircle,
-  ArrowLeft,
   Copy,
   Download,
   FileDiff,
   PanelRightOpen,
   Upload,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CheckPanel } from "@/components/check-panel";
+import { SiteHeader } from "@/components/site-header";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { ResizeSplit } from "@/components/resize-split";
 import { TranslateMenu } from "@/components/translate-menu";
@@ -420,8 +419,12 @@ export function Workspace() {
     }
   }
 
+  const toolBtn =
+    "inline-flex items-center gap-1.5 rounded-lg border border-stone-300/70 bg-white/70 px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-400 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40";
+
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-stone-200/80 text-stone-900">
+    <div className="shelf-paper flex h-dvh flex-col overflow-hidden text-stone-900">
+      <SiteHeader active="/editor" />
       <main className="flex min-h-0 w-full flex-1 flex-col lg:flex-row">
         <ResizeSplit
           className="min-h-0 flex-1"
@@ -431,20 +434,12 @@ export function Workspace() {
           minSecondPx={300}
           stackBelowLg
           first={
-        <section className="flex h-full min-h-0 flex-col overflow-hidden bg-white lg:min-h-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-4 py-2.5">
+        <section className="work-surface flex h-full min-h-0 flex-col overflow-hidden lg:min-h-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-300/60 px-4 py-2.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
-              <Link
-                href="/"
-                className="inline-flex shrink-0 items-center gap-1 text-xs text-stone-500 hover:text-stone-800"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                首页
-              </Link>
-              <span className="h-4 w-px shrink-0 bg-stone-200" aria-hidden />
-              <span className="text-sm font-medium text-stone-600">正文</span>
+              <span className="text-sm font-medium text-stone-800">正文</span>
               <span
-                className="max-w-[140px] truncate text-xs text-stone-400 sm:max-w-[200px]"
+                className="max-w-[140px] truncate text-xs text-stone-500 sm:max-w-[220px]"
                 title={documentName}
               >
                 {documentName}
@@ -466,7 +461,7 @@ export function Workspace() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50"
+                className={toolBtn}
               >
                 <Upload className="h-3.5 w-3.5" />
                 上传
@@ -475,7 +470,7 @@ export function Workspace() {
                 type="button"
                 disabled={!text.trim()}
                 onClick={exportMarkdown}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className={toolBtn}
               >
                 <Download className="h-3.5 w-3.5" />
                 导出
@@ -492,7 +487,7 @@ export function Workspace() {
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
                   viewChanges && canViewChanges
                     ? "border-stone-800 bg-stone-800 text-white"
-                    : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
+                    : "border-stone-300/70 bg-white/70 text-stone-700 hover:border-stone-400 hover:bg-white"
                 }`}
               >
                 <FileDiff className="h-3.5 w-3.5" />
@@ -501,7 +496,7 @@ export function Workspace() {
               <button
                 type="button"
                 onClick={copyText}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-50"
+                className={toolBtn}
               >
                 <Copy className="h-3.5 w-3.5" />
                 {copyHint ?? "复制"}
@@ -513,7 +508,7 @@ export function Workspace() {
               <button
                 type="button"
                 onClick={() => setMdPreviewOpen(true)}
-                className="absolute top-5 right-5 z-20 inline-flex items-center gap-1.5 rounded-lg border border-stone-700/10 bg-stone-800 px-3 py-1.5 text-xs font-medium text-white shadow-md transition hover:bg-stone-700"
+                className="absolute top-5 right-5 z-20 inline-flex items-center gap-1.5 rounded-lg border border-stone-300/70 bg-white/90 px-3 py-1.5 text-xs font-medium text-stone-800 backdrop-blur-sm transition hover:border-stone-400 hover:bg-white"
               >
                 <PanelRightOpen className="h-3.5 w-3.5" />
                 打开 Markdown 预览
@@ -578,7 +573,7 @@ export function Workspace() {
         </section>
           }
           second={
-        <aside className="flex h-full min-h-0 flex-col overflow-hidden border-t border-stone-200 bg-white lg:border-t-0">
+        <aside className="work-surface flex h-full min-h-0 flex-col overflow-hidden border-t border-stone-300/60 lg:border-t-0 lg:border-l">
           {(error || issueActionHint) && (
             <div
               className={`mx-3 mt-3 flex shrink-0 gap-2 rounded-xl border p-3 text-sm ${

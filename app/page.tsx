@@ -27,15 +27,10 @@ const ENTRIES = [
 
 export default function HomePage() {
   return (
-    <div className="shelf-paper h-dvh overflow-y-auto text-stone-900">
+    <div className="shelf-paper flex h-dvh flex-col overflow-y-auto text-stone-900">
       <SiteHeader active="/" />
-      <main className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-8">
-        <h1 className="text-[28px] font-semibold tracking-tight">笔耕</h1>
-        <p className="mt-2 text-sm text-stone-500">
-          改稿与阅读分开入口，各用其所。
-        </p>
-
-        <ul className="mt-10 grid max-w-xl grid-cols-2 gap-x-8 gap-y-10">
+      <main className="mx-auto flex w-full max-w-[1120px] flex-1 items-center px-5 py-10 sm:px-8">
+        <ul className="grid max-w-xl grid-cols-2 gap-x-8 gap-y-10">
           {ENTRIES.map((entry) => {
             const Icon = entry.icon;
             return (
